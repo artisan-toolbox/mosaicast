@@ -50,20 +50,14 @@ jobs:
           composer update --${{ matrix.stability }} --prefer-dist --no-interaction --no-progress --no-scripts
           composer run prepare
 
-      - name: PHPStan
-        run: composer analyse
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
 
-      - name: Linter
-        run: composer lint:check
+      - name: Install frontend dependencies
+        run: npm ci
 
-      - name: Type Coverage
-        if: runner.os != 'Windows'
-        run: composer test:types
-
-      - name: Test Suite
-        if: runner.os != 'Windows'
-        run: composer test:unit
-
-      - name: Test Suite (Windows)
-        if: runner.os == 'Windows'
-        run: vendor/bin/pest
+      - name: Run configured quality checks
+        run: php vendor/bin/maintainer quality:check --no-interaction
