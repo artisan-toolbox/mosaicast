@@ -10,6 +10,6 @@
 - Run TypeScript type checking as part of the JavaScript package's standard `check` command.
 - Keep the Vue channel subscription in sync through an always-included Inertia session identifier, including partial reloads that omit the event prop.
 - Consolidated the public documentation, updated the engineering checklist, and replaced the bundled Boost integration placeholder with current adoption guidance.
-- Install Maintainer explicitly in CI before running the configured quality checks, keeping it out of package installations.
+- Install Maintainer 1.5 or newer explicitly in CI before running the configured quality checks, keeping it out of package installations.
 
 The initial pre-release has not been tagged yet.
