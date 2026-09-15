@@ -1,0 +1,66 @@
+{
+  "$schema": "https://www.schemastore.org/package.json",
+  "name": "@artisan-toolbox/mosaicast",
+  "version": "0.1.0",
+  "description": "Vue and Inertia client integration for Artisan Toolbox Mosaicast.",
+  "keywords": [
+    "broadcasting",
+    "inertia",
+    "laravel",
+    "mosaicast",
+    "reverb",
+    "vue"
+  ],
+  "homepage": "https://github.com/artisan-toolbox/mosaicast",
+  "license": "MIT",
+  "author": {
+    "name": "Allan Mariucci Carvalho"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/artisan-toolbox/mosaicast"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "main": "./dist/index.common.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.common.js"
+    }
+  },
+  "scripts": {
+    "build": "vp build",
+    "dev": "vp dev",
+    "test": "vp test",
+    "check": "vp check && npm run typecheck",
+    "check:fix": "vp check --fix",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run check && npm run build"
+  },
+  "devDependencies": {
+    "@inertiajs/vue3": "^3.7.0",
+    "@types/node": "^24.13.3",
+    "typescript": "^5.8.3",
+    "vite-plugin-dts": "^4.5.3",
+    "vite-plus": "0.3.0",
+    "vue": "^3.5.13"
+  },
+  "peerDependencies": {
+    "@inertiajs/vue3": "^3.0.0",
+    "vue": "^3.0.0"
+  },
+  "overrides": {
+    "vite": "npm:@voidzero-dev/vite-plus-core@0.3.0",
+    "vitest": "4.1.11"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "packageManager": "npm@11.17.0"
+}

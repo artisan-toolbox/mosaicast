@@ -2,6 +2,11 @@
 
 declare(strict_types=1);
 
-// use Illuminate\Support\Facades\Route;
+use ArtisanToolbox\Mosaicast\Broadcasting\SessionBroadcastChannel;
+use Illuminate\Support\Facades\Broadcast;
 
-// Route::get('mosaicast', fn () => 'Mosaicast placeholder route.')->name('mosaicast.placeholder');
+Broadcast::channel(
+    (string) config('mosaicast.broadcasting.session_channel_prefix').'.{sessionIdentifier}',
+    SessionBroadcastChannel::class,
+    ['guards' => [(string) config('mosaicast.broadcasting.guard')]],
+);

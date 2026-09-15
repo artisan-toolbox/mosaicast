@@ -12,20 +12,6 @@ it('returns the same instance from the container', function () {
     expect(resolve(Mosaicast::class))->toBe(resolve(Mosaicast::class));
 });
 
-it('merges the package config', function () {
-    expect(config('mosaicast.placeholder'))->toBe('default');
-});
-
-it('loads the package translations', function () {
-    expect(trans('mosaicast::messages.placeholder'))->toBe('Mosaicast placeholder translation.');
-});
-
-it('loads the package views', function () {
-    expect(view()->exists('mosaicast::placeholder'))->toBeTrue();
-});
-
-it('registers the artisan command', function () {
-    $this->artisan('mosaicast:placeholder')
-        ->expectsOutputToContain('Mosaicast placeholder command executed.')
-        ->assertSuccessful();
+it('merges the package configuration', function (): void {
+    expect(config('mosaicast.broadcasting.guard'))->toBe('mosaicast-session');
 });

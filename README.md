@@ -9,12 +9,8 @@
 </p>
 
 <p align="center">
-    Laravel event delivery through the channel ready to reach the client.
+    Laravel event delivery through Inertia props or private session broadcasting.
 </p>
-
-## Documentation
-
-The complete installation, compatibility, event delivery, and configuration documentation is available at [artisantoolbox.wsssoftware.com.br/packages/mosaicast](https://artisantoolbox.wsssoftware.com.br/packages/mosaicast/).
 
 ## Installation
 
@@ -24,7 +20,21 @@ You can install the package via Composer:
 composer require artisan-toolbox/mosaicast
 ```
 
-Mosaicast is in early development. Its public event API and configuration will be documented before the first stable release.
+Requires PHP 8.3 and Laravel 13. Mosaicast is in early development; its public API may change before the first stable release.
+
+## Usage
+
+Dispatch an event during a request:
+
+```php
+use ArtisanToolbox\Mosaicast\Facades\Mosaicast;
+
+Mosaicast::dispatch('orders.updated', [
+    'orderId' => $order->id,
+]);
+```
+
+An Inertia response that resolves the `mosaicast` shared prop carries the event in `mosaicast.events`. Other responses use the current session's private broadcast channel. See the [complete documentation](https://artisantoolbox.wsssoftware.com.br/packages/mosaicast/) for jobs, event objects, channel authorization, and the Vue client.
 
 ## Resources
 
