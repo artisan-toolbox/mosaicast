@@ -47,6 +47,7 @@ jobs:
       - name: Install dependencies
         run: |
           composer require "artisan-toolbox/core:1.x-dev" "laravel/framework:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --no-update
+          composer require "artisan-toolbox/maintainer:^1.0" --dev --no-interaction --no-update
           composer update --${{ matrix.stability }} --prefer-dist --no-interaction --no-progress --no-scripts
           composer run prepare
 

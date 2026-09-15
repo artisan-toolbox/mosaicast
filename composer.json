@@ -17,12 +17,11 @@
         }
     ],
     "require": {
-        "php": "^8.3",
+        "php": "^8.5",
         "illuminate/support": "^13.0",
         "artisan-toolbox/core": "^1.0"
     },
     "require-dev": {
-        "artisan-toolbox/maintainer": "^1.0",
         "driftingly/rector-laravel": "^2.5",
         "larastan/larastan": "^3.9",
         "laravel/pint": "^1.29",
