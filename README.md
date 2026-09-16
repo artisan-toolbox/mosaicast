@@ -5,7 +5,7 @@
 <p align="center">
     <a href="https://packagist.org/packages/artisan-toolbox/mosaicast"><img src="https://img.shields.io/packagist/v/artisan-toolbox/mosaicast.svg?style=flat-square" alt="Packagist"></a>
     <a href="https://packagist.org/packages/artisan-toolbox/mosaicast"><img src="https://img.shields.io/packagist/php-v/artisan-toolbox/mosaicast.svg?style=flat-square" alt="PHP from Packagist"></a>
-    <a href="https://github.com/artisan-toolbox/mosaicast/actions"><img src="https://img.shields.io/github/actions/workflow/status/artisan-toolbox/mosaicast/tests.yml?branch=main&label=Tests&style=flat-square" alt="Tests"></a>
+    <a href="https://github.com/artisan-toolbox/mosaicast/actions"><img src="https://github.com/artisan-toolbox/mosaicast/actions/workflows/tests.yml/badge.svg" alt="Tests"></a>
 </p>
 
 <p align="center">
