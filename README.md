@@ -20,7 +20,7 @@ You can install the package via Composer:
 composer require artisan-toolbox/mosaicast
 ```
 
-Requires PHP 8.3 and Laravel 13. Mosaicast is in early development; its public API may change before the first stable release.
+Requires PHP 8.5 and Laravel 13.
 
 ## Usage
 

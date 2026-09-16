@@ -1,6 +1,6 @@
 # Mosaicast Engineering Checklist
 
-The implemented behavior is documented in the [central Mosaicast guide](https://artisantoolbox.wsssoftware.com.br/packages/mosaicast/). This checklist tracks work still needed before a stable release; it is not a second API reference.
+The implemented behavior is documented in the [central Mosaicast guide](https://artisantoolbox.wsssoftware.com.br/packages/mosaicast/). This checklist tracks follow-up coverage and design work; it is not a second API reference.
 
 ## Implemented
 
@@ -15,7 +15,7 @@ The implemented behavior is documented in the [central Mosaicast guide](https://
 - [x] Keep channel subscriptions in sync through the always-included `mosaicastSessionIdentifier` Inertia prop.
 - [x] Document installation, event objects, Inertia and broadcast delivery, session security, jobs, and Vue integration centrally.
 
-## Release-readiness tests
+## Integration coverage
 
 - [ ] Add a full integration test or repeatable laboratory scenario using configured Reverb, Echo, Inertia, and a real browser session.
 - [ ] Test actual HTTP responses for redirects, downloads, streams, and exception paths in addition to direct `RequestHandled` dispatch tests.
@@ -23,11 +23,11 @@ The implemented behavior is documented in the [central Mosaicast guide](https://
 - [ ] Verify history navigation and partial reloads against the real Inertia client so an already-delivered event is never re-emitted unexpectedly.
 - [ ] Review session rotation, expiry, cross-origin cookies, and authorization failures in the integration application.
 
-## API decisions
+## Future API considerations
 
 - [ ] Decide whether to add a PHP `mosaicast()` helper. The current PHP entry point is the facade; the JavaScript `mosaicast()` function already exists.
 - [ ] Decide whether future releases need user-scoped targets or persisted/replayable delivery. Version 1 currently targets one session and provides best-effort broadcasting.
-- [ ] Review the public API and compatibility matrix before the first stable release.
-- [ ] Align the PHP `VERSION` constant, JavaScript manifest version, and Git release tags before publishing.
+- [ ] Review the public API and compatibility matrix before future releases.
+- [ ] Keep the PHP `VERSION` constant, JavaScript manifest version, and Git release tags aligned when preparing a release.
 
 Broadcasting cannot replay an event sent before the browser subscribes. In particular, a partial Inertia response that rotates the session but omits the event prop can send a fallback broadcast before the Vue client joins the new channel. The [delivery guide](https://artisantoolbox.wsssoftware.com.br/packages/mosaicast/inertia-delivery/) explains the current mitigation.

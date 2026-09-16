@@ -19,7 +19,7 @@ Use this skill when a Laravel application needs to integrate the Mosaicast packa
 
 ### 1. Inspect the Laravel app context
 
-- confirm the app supports PHP 8.3 and Laravel 13
+- confirm the app supports PHP 8.5 and Laravel 13
 - identify the web routes, Inertia responses, queued jobs, and Vue entry point that need events
 - confirm web routes start a Laravel session and the app has a configured broadcaster and `/broadcasting/auth` route
 
