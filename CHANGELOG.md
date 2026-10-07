@@ -42,6 +42,7 @@
 
 ## Unreleased
 
+- Added the `mosaicast()` PHP helper for implicit dispatch and fluent explicit session delivery with `mosaicast()->toSession(...)`.
 - Mosaicast now accepts Laravel event objects, honoring `broadcastAs()` and `broadcastWith()`.
 - Added the `DispatchesMosaicast` trait for `Event::mosaicast(...)` dispatching.
 - Hardened session-target delivery and client payload validation to prevent malformed channel targets and invalid event data from being processed.

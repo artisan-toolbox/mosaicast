@@ -170,6 +170,20 @@ it('dispatches an event through the static Mosaicast shortcut', function (): voi
     ]]);
 });
 
+it('dispatches an event through the Mosaicast helper', function (): void {
+    $request = mosaicastRequest();
+    app()->instance('request', $request);
+
+    mosaicast('orders.updated', ['orderId' => 123]);
+
+    $payload = Inertia::getShared('mosaicast')();
+
+    expect($payload['events'])->toBe([[
+        'name' => 'orders.updated',
+        'payload' => ['orderId' => 123],
+    ]]);
+});
+
 it('dispatches broadcasts for events that were not resolved through an Inertia response', function (): void {
     $dispatched = [];
     Event::listen(BroadcastMosaicastEvent::class, function (BroadcastMosaicastEvent $event) use (&$dispatched): void {
@@ -249,6 +263,21 @@ it('broadcasts directly to an explicit session identifier', function (): void {
         ->and($dispatched[0]->broadcastAs())->toBe('orders.updated')
         ->and($dispatched[0]->broadcastWith())->toBe(['orderId' => 123])
         ->and($dispatched[0]->broadcastOn()->name)->toBe('private-mosaicast.sessions.9c9206cc5d38f284d87ca2cb6ad30b6c63a948b9960773742634793ed99f2681');
+});
+
+it('exposes explicit session delivery through the Mosaicast helper', function (): void {
+    $dispatched = [];
+    Event::listen(BroadcastMosaicastEvent::class, function (BroadcastMosaicastEvent $event) use (&$dispatched): void {
+        $dispatched[] = $event;
+    });
+
+    mosaicast()
+        ->toSession('9c9206cc5d38f284d87ca2cb6ad30b6c63a948b9960773742634793ed99f2681')
+        ->dispatch('orders.updated', ['orderId' => 123]);
+
+    expect($dispatched)->toHaveCount(1)
+        ->and($dispatched[0]->broadcastAs())->toBe('orders.updated')
+        ->and($dispatched[0]->broadcastWith())->toBe(['orderId' => 123]);
 });
 
 it('rejects malformed explicit session identifiers', function (): void {

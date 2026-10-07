@@ -34,6 +34,9 @@ Mosaicast::dispatch('orders.updated', [
 ]);
 ```
 
+The `mosaicast()` helper offers the same implicit dispatch API. Call it without
+an event to target a captured session explicitly: `mosaicast()->toSession($identifier)->dispatch(...)`.
+
 An Inertia response that resolves the `mosaicast` shared prop carries the event in `mosaicast.events`. Other responses use the current session's private broadcast channel. See the [complete documentation](https://artisantoolbox.wsssoftware.com.br/packages/mosaicast/) for jobs, event objects, channel authorization, and the Vue client.
 
 ## Resources
