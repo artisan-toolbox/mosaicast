@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.1.0] - 2026-10-07
+
+### Features
+
+- **Add `mosaicast()` helper for simplified event dispatch** (`953c403`)
+  Introduces a new global PHP helper function `mosaicast(string|object|null $event = null, array $payload = []): Mosaicast` (guarded by `function_exists` to avoid redeclaration). The helper resolves the `Mosaicast` service from the container (`resolve(Mosaicast::class)`) and enables streamlined dispatch patterns:
+- When `$event` is provided, it calls `$mosaicast->dispatch($event, $payload)`.
+- In all cases it returns the `Mosaicast` instance, allowing fluent chaining such as `mosaicast()->toSession($identifier)->dispatch(...)`.
+This matters because it provides an ergonomic, globally accessible entry point for implicit dispatch and for explicitly targeting a captured session via the existing fluent `toSession(...)` API. Compatibility impact: it adds a new callable without removing or changing existing public APIs; applications can start using the helper immediately. Migration needs: none—adoption is optional, but documentation/tests are updated to reflect the new helper.
+
+### Maintenance
+
+- **Add artisan-toolbox maintainer to dev requirements** (`81a7863`)
+  Adds `artisan-toolbox/maintainer` to `composer.json` `require-dev` to ensure the project has the maintainer/tooling utilities needed during development. This can affect contributors by requiring an additional dev dependency for local setup/CI, but it does not introduce user-facing API changes or runtime behavior changes for consumers (beyond normal dev dependency installation).
+
+- **Update GitHub Actions badge URL in README** (`b27d0ac`)
+  Updates the GitHub Actions badge URL in `README.md` for the tests workflow to use the newer `actions/workflows/.../badge.svg` format instead of the older Shields `workflow/status` URL. This is a documentation-only change that improves badge reliability/visual accuracy without affecting library behavior, public APIs, or runtime behavior.
+
 ## [1.0.0] - 2026-09-16
 
 ### Features
