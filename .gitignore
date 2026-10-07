@@ -5,6 +5,7 @@
 /.phpunit.result.cache
 /coverage
 composer.lock
+package-lock.json
 .phpunit.cache
 .phpunit.result.cache
 .DS_Store

@@ -18,7 +18,6 @@ return RectorConfig::configure()
         __DIR__.'/src',
         __DIR__.'/tests',
     ])
-    ->withComposerBased()
     ->withComposerBased(laravel: true)
     ->withSets([
         LaravelSetList::LARAVEL_ARRAY_STR_FUNCTION_TO_STATIC_CALL,
