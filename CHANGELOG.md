@@ -1,5 +1,9 @@
 # Changelog
 
+## [Unreleased]
+
+- Generate the README logo, badges, and description with Maintainer 1.9 during releases.
+
 ## [1.1.1] - 2026-11-04
 
 ### Refactoring

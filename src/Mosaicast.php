@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace ArtisanToolbox\Mosaicast;
 
-use ArtisanToolbox\Maintainer\Versionable\Contracts\Versionable;
 use ArtisanToolbox\Mosaicast\Delivery\MosaicastBroadcaster;
 use ArtisanToolbox\Mosaicast\Delivery\SessionDeliveryTarget;
 use ArtisanToolbox\Mosaicast\Delivery\TargetedMosaicast;
@@ -13,10 +12,8 @@ use ArtisanToolbox\Mosaicast\Http\MosaicastRequestContext;
 use Illuminate\Http\Request;
 use LogicException;
 
-class Mosaicast implements Versionable
+class Mosaicast
 {
-    public const string VERSION = '1.1.1';
-
     public function __construct(
         private readonly MosaicastRequestContext $context,
         private readonly MosaicastBroadcaster $broadcaster,

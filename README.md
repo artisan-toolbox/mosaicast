@@ -1,16 +1,19 @@
-<div align="center">
+<!-- MAINTAINER:README_HEAD:START -->
+<div id="maintainer-title" align="center">
+    <img src="logo/mosaicast-icon.svg" alt="" width="88">
     <h1>Mosaicast</h1>
 </div>
 
-<p align="center">
-    <a href="https://packagist.org/packages/artisan-toolbox/mosaicast"><img src="https://img.shields.io/packagist/v/artisan-toolbox/mosaicast.svg?style=flat-square" alt="Packagist"></a>
-    <a href="https://packagist.org/packages/artisan-toolbox/mosaicast"><img src="https://img.shields.io/packagist/php-v/artisan-toolbox/mosaicast.svg?style=flat-square" alt="PHP from Packagist"></a>
-    <a href="https://github.com/artisan-toolbox/mosaicast/actions"><img src="https://github.com/artisan-toolbox/mosaicast/actions/workflows/tests.yml/badge.svg" alt="Tests"></a>
+<p id="maintainer-badges" align="center">
+<a href="https://github.com/artisan-toolbox/mosaicast/releases"><img src="https://img.shields.io/badge/version-1.1.1-blue?style=flat-square" alt="version"></a>
+<a href="https://packagist.org/packages/artisan-toolbox/mosaicast"><img src="https://img.shields.io/packagist/php-v/artisan-toolbox/mosaicast.svg?style=flat-square" alt="PHP from Packagist"></a>
+<a href="https://github.com/artisan-toolbox/mosaicast/actions"><img src="https://img.shields.io/github/actions/workflow/status/artisan-toolbox/mosaicast/tests.yml?branch=1.x&amp;label=Tests&amp;style=flat-square" alt="Tests"></a>
 </p>
 
-<p align="center">
+<p id="maintainer-description" align="center">
     Laravel event delivery through Inertia props or private session broadcasting.
 </p>
+<!-- MAINTAINER:README_HEAD:END -->
 
 ## Installation
 

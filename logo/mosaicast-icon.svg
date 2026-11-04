@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title id="title">Mosaicast icon</title>
+  <rect x="2" y="2" width="60" height="60" rx="14" fill="#20252B"/>
+  <rect x="2.75" y="2.75" width="58.5" height="58.5" rx="13.25" fill="none" stroke="#FFFFFF" stroke-opacity=".16" stroke-width="1.5"/>
+  <g fill="#FFF7EF">
+    <rect x="13" y="17" width="8" height="14" rx="2"/>
+    <rect x="13" y="34" width="8" height="13" rx="2"/>
+    <rect x="43" y="17" width="8" height="14" rx="2"/>
+    <rect x="43" y="34" width="8" height="13" rx="2"/>
+  </g>
+  <path d="M24 20a1.5 1.5 0 0 1 2.6-1L32 25l5.4-6a1.5 1.5 0 0 1 2.6 1v7l-8 9-8-9z" fill="#B6A5FF"/>
+  <path d="M32 25l5.4-6a1.5 1.5 0 0 1 2.6 1v7l-8 9z" fill="#65E5D2"/>
+</svg>
