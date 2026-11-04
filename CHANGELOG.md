@@ -2,6 +2,7 @@
 
 ## [Unreleased]
 
+- Standardize README badges for release status, compatibility, CI, and documentation.
 - Generate the README logo, badges, and description with Maintainer 1.9 during releases.
 - Use `ArtisanToolbox\Mosaicast\Delivery\MosaicastDispatcher` for direct dispatcher injection. The root `Mosaicast` class now holds release metadata.
 - Deliver Inertia events on same-page reloads and skip stale event props from partial responses and browser history. Fresh full-page responses still deliver events after browser back or forward navigation.
