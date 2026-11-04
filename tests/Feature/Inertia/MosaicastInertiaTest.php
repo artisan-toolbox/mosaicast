@@ -11,7 +11,9 @@ use Illuminate\Http\Request;
 use Illuminate\Session\ArraySessionHandler;
 use Illuminate\Session\Store;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use Inertia\Response as InertiaResponse;
 use Symfony\Component\HttpFoundation\Response;
 
 final class EventWithPublicPayload
@@ -87,18 +89,20 @@ it('returns events through resolved Inertia props without requiring middleware',
 });
 
 it('marks full documents without marking subsequent Inertia visits', function (): void {
-    $request = mosaicastRequest();
-    app()->instance('request', $request);
-    app()->instance('session', $request->session());
+    config(['app.key' => str_repeat('a', 32)]);
 
-    Inertia::getShared('mosaicast')();
+    Route::middleware('web')->get('/orders', fn (): InertiaResponse => Inertia::render('Orders')
+        ->rootView('mosaicast::placeholder'));
 
-    expect(Inertia::pullFlashed($request))->toBe(['mosaicastInitialPage' => true]);
+    $document = $this->get('/orders')
+        ->assertOk()
+        ->assertViewHas('page.flash.mosaicastInitialPage', true);
 
-    $request->headers->set('X-Inertia', 'true');
-    Inertia::getShared('mosaicast')();
-
-    expect(Inertia::pullFlashed($request))->toBe([]);
+    $this->withCookie(config('session.cookie'), session()->getId())
+        ->get('/orders', ['X-Inertia' => 'true'])
+        ->assertOk()
+        ->assertJsonPath('props.mosaicastSessionIdentifier', $document->viewData('page')['props']['mosaicastSessionIdentifier'])
+        ->assertJsonMissingPath('flash.mosaicastInitialPage');
 });
 
 it('registers the Mosaicast shared prop when Inertia is installed', function (): void {
