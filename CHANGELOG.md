@@ -1,5 +1,28 @@
 # Changelog
 
+## [1.2.0] - 2026-11-04
+
+### Features
+
+- **Deliver Inertia events safely and update dispatcher API** (`8003cd0`)
+  Implements safer Mosaicast event delivery integrated with Inertia navigation. In particular, it hardens how events are delivered across same-page reloads by skipping stale/invalid partial/history props, validating and normalizing payloads (including converting empty payload arrays to empty objects), and ignoring malformed event payloads without dropping valid sibling events. It also updates the delivery surface to use the Mosaicast dispatcher API where applicable, aligning event emission with the new dispatcher-driven architecture.
+
+User impact: Inertia navigation should more reliably deliver only valid Mosaicast events, avoiding previously observed cases where stale/invalid partial/history props could cause incorrect event delivery.
+Compatibility/migration: If you rely on older dispatcher wiring or payload shapes, ensure your emitted/serialized Mosaicast event payloads conform to the stricter validation (events must have a valid non-empty name; payload must match the expected structure and invalid items are now skipped rather than propagated).
+
+### Tests
+
+- **Adjust inertia flash assertions and routing tests** (`b1bc7d6`)
+  Refactors Inertia-related tests to better reflect Mosaicast’s event/flash lifecycle. Routing and flash behavior around Mosaicast delivery is adjusted, including updated assertions to match the new event handling behavior for same-page reloads and navigation flows.
+
+### Maintenance
+
+- **Standardize README badges for release and compatibility** (`9bfb496`)
+  Updates README badge/logo presentation to a standardized set used for release and compatibility signaling. This improves consistency across documentation surfaces and reduces ambiguity about which versions/requirements the package supports.
+
+- **Add maintainer-generated README head for releases** (`2df3993`)
+  Adds/updates the maintainer-generated README head used during releases. This is a documentation/release-automation support change that standardizes the README header content for future release builds.
+
 ## [Unreleased]
 
 - Standardize README badges for release status, compatibility, CI, and documentation.

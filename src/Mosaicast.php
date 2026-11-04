@@ -11,7 +11,7 @@ use ArtisanToolbox\Maintainer\Versionable\Readme\Head;
 
 final class Mosaicast implements Versionable, WithReadmeHead
 {
-    public const string VERSION = '1.1.1';
+    public const string VERSION = '1.2.0';
 
     public function readmeHead(): Head
     {
