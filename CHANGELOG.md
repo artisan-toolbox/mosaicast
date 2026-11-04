@@ -1,5 +1,51 @@
 # Changelog
 
+## [1.1.1] - 2026-11-04
+
+### Refactoring
+
+- **Merge remote-tracking branch 'origin/1.x' into 1.x** (`c064cdb`)
+  Merges the remote `origin/1.x` branch into the local `1.x` branch. This changelog entry reflects integration of upstream branch history and may include multiple unrelated commits. Functional impact depends on the merged changes, but no specific behavior changes are described in the provided summary beyond incorporating the branch state.
+
+### Build
+
+- **Add phpstan/phpstan dev dependency** (`a688495`)
+  Adds `phpstan/phpstan` as a new development dependency (version range `^2.2.8`). This enhances static analysis coverage during development/CI. User impact is primarily for contributors/CI: PHPStan may start reporting new findings or require compatible config, depending on the added ruleset and the project’s codebase.
+
+### Continuous Integration
+
+- **Bump shivammathur/setup-php from 2.37.2 to 2.40.0** (`6110cbe`)
+  Updates the GitHub Actions `shivammathur/setup-php` action from `2.37.2` to `2.40.0`. This affects the CI environment setup step and may improve PHP tooling support and reliability. User impact is limited to CI runs and contributor workflows that rely on GitHub Actions; no production/library API changes are indicated.
+
+- **Update test workflow branch target to 1.x** (`d9ef31c`)
+  Changes the GitHub Actions test workflow push trigger branch target from `main` to `1.x` (still matching `*.x`). This keeps CI aligned with the repository’s active maintenance branch strategy. User impact: future pushes will trigger CI according to the `1.x` branch targeting rules rather than `main`. It is a workflow/CI behavior change, not an application code change.
+
+### Maintenance
+
+- **Bump artisan-toolbox maintainer to 1.8.0** (`547d992`)
+  Updates the development dependency `artisan-toolbox/maintainer` to version `1.8.0`. This is a tooling/dependency maintenance change intended to keep the repository aligned with the latest maintainer tooling. User impact is limited to development workflows (e.g., CI checks and code quality automation that rely on the maintainer); it may alter lint/fix behaviors depending on what changed in the maintainer between versions. No production/runtime code or API changes are described.
+
+- **Bump artisan-toolbox maintainer to ^1.7.0** (`404c8b3`)
+  Moves the `artisan-toolbox/maintainer` development dependency constraint to `^1.7.0`. This is a pre-step toward later maintainer updates, affecting only development tooling/CI automation that depends on the maintainer. No production behavior or API changes are indicated.
+
+- **Bump artisan-toolbox/maintainer to ^1.6.0** (`9233ad1`)
+  Updates the `artisan-toolbox/maintainer` development dependency constraint to `^1.6.0`. This affects development tooling (CI and code quality automation) by aligning it with newer maintainer tooling. No runtime/API changes are described.
+
+- **Merge dependabot PR for setup-php action v2.40.0** (`24f9810`)
+  Merges a Dependabot pull request that updates `shivammathur/setup-php` to `2.40.0` (still within the v2 major line). This primarily affects GitHub Actions CI environment setup, potentially improving compatibility with newer PHP versions and build tooling. No application runtime/API changes are indicated.
+
+- **Improved maintainer** (`5cba608`)
+  Applies improvements related to the maintainer tooling (as reflected by the repository’s maintainer-related configuration and/or scripts). This is intended to refine development/CI behavior without claiming runtime/API changes. Because only a high-level summary is provided, detailed functional impact is limited to the maintainer-driven automation used by contributors and CI.
+
+- **Bump artisan-toolbox maintainer dev dependency** (`982b47c`)
+  Updates the `artisan-toolbox/maintainer` development dependency (dev-related constraint/version advancement as part of maintainer upgrades). This primarily impacts CI and contributor tooling that depends on the maintainer. No production dependency or runtime API changes are described.
+
+- **Add npm lockfile and ignore composer lock duplicates** (`1d87c78`)
+  Adds an npm lockfile and updates ignores to prevent duplicate composer lock handling. This is a repository maintenance/lock-management change intended to stabilize dependency resolution and reduce noisy diffs/CI behavior caused by duplicated lockfiles. Functional impact is limited to development/CI consistency rather than runtime behavior.
+
+- **Ignore package-lock and adjust rector config** (`4d5ee73`)
+  Updates repository hygiene by ignoring `package-lock.json` and adjusts the Rector configuration accordingly. This affects development tooling and automated code transformation/linting behavior. No production/library API changes are described, but contributors/CI may see differences in how Rector runs and which lockfile changes are detected.
+
 ## [Unreleased]
 
 ### Maintenance
