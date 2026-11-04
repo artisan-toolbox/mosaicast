@@ -3,8 +3,8 @@
 declare(strict_types=1);
 
 use ArtisanToolbox\Mosaicast\Concerns\DispatchesMosaicast;
+use ArtisanToolbox\Mosaicast\Delivery\MosaicastDispatcher;
 use ArtisanToolbox\Mosaicast\Events\BroadcastMosaicastEvent;
-use ArtisanToolbox\Mosaicast\Mosaicast;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Foundation\Http\Events\RequestHandled;
 use Illuminate\Http\Request;
@@ -63,6 +63,7 @@ function mosaicastRequest(): Request
 {
     $session = new Store('test', new ArraySessionHandler(120));
     $session->setId(str_repeat('a', 40));
+    $session->put('_token', 'test-session-token');
     $request = Request::create('/orders', 'POST');
     $request->setLaravelSession($session);
 
@@ -73,7 +74,7 @@ it('returns events through resolved Inertia props without requiring middleware',
     $request = mosaicastRequest();
     app()->instance('request', $request);
 
-    resolve(Mosaicast::class)->dispatch('orders.updated', ['orderId' => 123]);
+    resolve(MosaicastDispatcher::class)->dispatch('orders.updated', ['orderId' => 123]);
 
     $payload = Inertia::getShared('mosaicast')();
 
@@ -83,6 +84,21 @@ it('returns events through resolved Inertia props without requiring middleware',
             'payload' => ['orderId' => 123],
         ]],
     ])->and($payload['sessionIdentifier'])->toMatch('/^[a-f0-9]{64}$/');
+});
+
+it('marks full documents without marking subsequent Inertia visits', function (): void {
+    $request = mosaicastRequest();
+    app()->instance('request', $request);
+    app()->instance('session', $request->session());
+
+    Inertia::getShared('mosaicast')();
+
+    expect(Inertia::pullFlashed($request))->toBe(['mosaicastInitialPage' => true]);
+
+    $request->headers->set('X-Inertia', 'true');
+    Inertia::getShared('mosaicast')();
+
+    expect(Inertia::pullFlashed($request))->toBe([]);
 });
 
 it('registers the Mosaicast shared prop when Inertia is installed', function (): void {
@@ -100,11 +116,12 @@ it('includes the session identifier on partial Inertia responses while leaving e
     $request->headers->set('X-Inertia-Partial-Data', 'orders');
     app()->instance('request', $request);
 
-    resolve(Mosaicast::class)->dispatch('orders.updated', ['orderId' => 123]);
+    resolve(MosaicastDispatcher::class)->dispatch('orders.updated', ['orderId' => 123]);
     $response = Inertia::render('Orders', ['orders' => []])->toResponse($request);
     $props = $response->getData(true)['props'];
 
     expect($props)->toHaveKey('mosaicastSessionIdentifier')
+        ->and($props['mosaicastHasEvents'])->toBeFalse()
         ->not->toHaveKey('mosaicast')
         ->and($props['mosaicastSessionIdentifier'])->toMatch('/^[a-f0-9]{64}$/');
 
@@ -114,11 +131,27 @@ it('includes the session identifier on partial Inertia responses while leaving e
         ->and($dispatched[0]->broadcastAs())->toBe('orders.updated');
 });
 
+it('marks a partial response containing new events for client delivery', function (): void {
+    $request = mosaicastRequest();
+    $request->headers->set('X-Inertia', 'true');
+    $request->headers->set('X-Inertia-Partial-Component', 'Orders');
+    $request->headers->set('X-Inertia-Partial-Data', 'mosaicast');
+    app()->instance('request', $request);
+
+    mosaicast('orders.updated');
+    $props = Inertia::render('Orders')->toResponse($request)->getData(true)['props'];
+
+    expect($props['mosaicastHasEvents'])->toBeTrue()
+        ->and($props['mosaicast']['events'])->toBe([
+            ['name' => 'orders.updated', 'payload' => []],
+        ]);
+});
+
 it('uses a Laravel event class name and public properties by default', function (): void {
     $request = mosaicastRequest();
     app()->instance('request', $request);
 
-    resolve(Mosaicast::class)->dispatch(new EventWithPublicPayload(123));
+    resolve(MosaicastDispatcher::class)->dispatch(new EventWithPublicPayload(123));
 
     $payload = Inertia::getShared('mosaicast')();
 
@@ -132,7 +165,7 @@ it('uses Laravel broadcast naming and payload methods for event objects', functi
     $request = mosaicastRequest();
     app()->instance('request', $request);
 
-    resolve(Mosaicast::class)->dispatch(new EventWithBroadcastContract);
+    resolve(MosaicastDispatcher::class)->dispatch(new EventWithBroadcastContract);
 
     $payload = Inertia::getShared('mosaicast')();
 
@@ -146,7 +179,7 @@ it('uses the value of a string-backed broadcast name enum', function (): void {
     $request = mosaicastRequest();
     app()->instance('request', $request);
 
-    resolve(Mosaicast::class)->dispatch(new EventWithEnumBroadcastName);
+    resolve(MosaicastDispatcher::class)->dispatch(new EventWithEnumBroadcastName);
 
     $payload = Inertia::getShared('mosaicast')();
 
@@ -192,7 +225,7 @@ it('dispatches broadcasts for events that were not resolved through an Inertia r
     $request = mosaicastRequest();
     app()->instance('request', $request);
 
-    resolve(Mosaicast::class)->dispatch('orders.updated', ['orderId' => 123]);
+    resolve(MosaicastDispatcher::class)->dispatch('orders.updated', ['orderId' => 123]);
 
     event(new RequestHandled($request, new Response));
 
@@ -200,7 +233,7 @@ it('dispatches broadcasts for events that were not resolved through an Inertia r
         ->and($dispatched[0]->broadcastAs())->toBe('orders.updated')
         ->and($dispatched[0]->broadcastWith())->toBe(['orderId' => 123])
         ->and($dispatched[0]->broadcastOn())->toBeInstanceOf(PrivateChannel::class)
-        ->and($dispatched[0]->broadcastOn()->name)->toBe('private-mosaicast.sessions.9c9206cc5d38f284d87ca2cb6ad30b6c63a948b9960773742634793ed99f2681');
+        ->and($dispatched[0]->broadcastOn()->name)->toBe('private-mosaicast.sessions.7a2ec00f1db6d65aa29a522c84e9d1ac594b7f7bdfe63050300ea8164289ecac');
 });
 
 it('delivers only unresolved events by broadcast after shared props are consumed', function (): void {
@@ -210,7 +243,7 @@ it('delivers only unresolved events by broadcast after shared props are consumed
     });
     $request = mosaicastRequest();
     app()->instance('request', $request);
-    $mosaicast = resolve(Mosaicast::class);
+    $mosaicast = resolve(MosaicastDispatcher::class);
 
     $mosaicast->dispatch('orders.first', ['orderId' => 123]);
     $payload = Inertia::getShared('mosaicast')();
@@ -229,7 +262,7 @@ it('delivers only unresolved events by broadcast after shared props are consumed
 it('requires an active session for implicit dispatch', function (): void {
     app()->instance('request', Request::create('/orders', 'POST'));
 
-    resolve(Mosaicast::class)->dispatch('orders.updated', ['orderId' => 123]);
+    resolve(MosaicastDispatcher::class)->dispatch('orders.updated', ['orderId' => 123]);
 })->throws(LogicException::class, 'Mosaicast events require an active session request.');
 
 it('broadcasts events emitted after the response was handled', function (): void {
@@ -242,7 +275,7 @@ it('broadcasts events emitted after the response was handled', function (): void
 
     event(new RequestHandled($request, new Response));
 
-    resolve(Mosaicast::class)->dispatch('orders.updated', ['orderId' => 123]);
+    resolve(MosaicastDispatcher::class)->dispatch('orders.updated', ['orderId' => 123]);
 
     expect($dispatched)->toHaveCount(1)
         ->and($dispatched[0]->broadcastAs())->toBe('orders.updated')
@@ -255,14 +288,14 @@ it('broadcasts directly to an explicit session identifier', function (): void {
         $dispatched[] = $event;
     });
 
-    resolve(Mosaicast::class)
-        ->toSession('9c9206cc5d38f284d87ca2cb6ad30b6c63a948b9960773742634793ed99f2681')
+    resolve(MosaicastDispatcher::class)
+        ->toSession('7a2ec00f1db6d65aa29a522c84e9d1ac594b7f7bdfe63050300ea8164289ecac')
         ->dispatch('orders.updated', ['orderId' => 123]);
 
     expect($dispatched)->toHaveCount(1)
         ->and($dispatched[0]->broadcastAs())->toBe('orders.updated')
         ->and($dispatched[0]->broadcastWith())->toBe(['orderId' => 123])
-        ->and($dispatched[0]->broadcastOn()->name)->toBe('private-mosaicast.sessions.9c9206cc5d38f284d87ca2cb6ad30b6c63a948b9960773742634793ed99f2681');
+        ->and($dispatched[0]->broadcastOn()->name)->toBe('private-mosaicast.sessions.7a2ec00f1db6d65aa29a522c84e9d1ac594b7f7bdfe63050300ea8164289ecac');
 });
 
 it('exposes explicit session delivery through the Mosaicast helper', function (): void {
@@ -272,7 +305,7 @@ it('exposes explicit session delivery through the Mosaicast helper', function ()
     });
 
     mosaicast()
-        ->toSession('9c9206cc5d38f284d87ca2cb6ad30b6c63a948b9960773742634793ed99f2681')
+        ->toSession('7a2ec00f1db6d65aa29a522c84e9d1ac594b7f7bdfe63050300ea8164289ecac')
         ->dispatch('orders.updated', ['orderId' => 123]);
 
     expect($dispatched)->toHaveCount(1)
@@ -281,18 +314,18 @@ it('exposes explicit session delivery through the Mosaicast helper', function ()
 });
 
 it('rejects malformed explicit session identifiers', function (): void {
-    resolve(Mosaicast::class)->toSession('not-an-opaque-session-identifier');
+    resolve(MosaicastDispatcher::class)->toSession('not-an-opaque-session-identifier');
 })->throws(InvalidArgumentException::class, 'The session identifier must be a 64-character lowercase SHA-256 hash.');
 
-it('uses the regenerated session identifier for events and shared props', function (): void {
+it('uses the new channel identifier after CSRF token rotation', function (): void {
     $request = mosaicastRequest();
     app()->instance('request', $request);
-    $mosaicast = resolve(Mosaicast::class);
+    $mosaicast = resolve(MosaicastDispatcher::class);
 
     $mosaicast->dispatch('orders.updated', ['orderId' => 123]);
     $originalIdentifier = $mosaicast->currentSessionIdentifier();
 
-    $request->session()->setId(str_repeat('b', 40));
+    $request->session()->regenerateToken();
     $mosaicast->dispatch('orders.updated', ['orderId' => 456]);
 
     $payload = Inertia::getShared('mosaicast')();
@@ -310,12 +343,12 @@ it('uses the regenerated session identifier for a broadcast fallback', function 
     $request = mosaicastRequest();
     app()->instance('request', $request);
 
-    resolve(Mosaicast::class)->dispatch('orders.updated', ['orderId' => 123]);
+    resolve(MosaicastDispatcher::class)->dispatch('orders.updated', ['orderId' => 123]);
     $request->session()->setId(str_repeat('b', 40));
 
     event(new RequestHandled($request, new Response));
 
     expect($dispatched)->toHaveCount(1)
         ->and($dispatched[0]->broadcastOn()->name)
-        ->toBe('private-mosaicast.sessions.84367bb1439cbe1e5018b7075eb748e952038ce1cee777ce4d20b0f60f657558');
+        ->toBe('private-mosaicast.sessions.322cca83636516eeb2da2d3782ac81c5ed2f91e9bb22c396527f67091856f047');
 });

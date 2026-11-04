@@ -4,60 +4,31 @@ declare(strict_types=1);
 
 namespace ArtisanToolbox\Mosaicast;
 
-use ArtisanToolbox\Mosaicast\Delivery\MosaicastBroadcaster;
-use ArtisanToolbox\Mosaicast\Delivery\SessionDeliveryTarget;
-use ArtisanToolbox\Mosaicast\Delivery\TargetedMosaicast;
-use ArtisanToolbox\Mosaicast\Events\MosaicastEvent;
-use ArtisanToolbox\Mosaicast\Http\MosaicastRequestContext;
-use Illuminate\Http\Request;
-use LogicException;
+use ArtisanToolbox\Maintainer\Versionable\Contracts\Versionable;
+use ArtisanToolbox\Maintainer\Versionable\Contracts\WithReadmeHead;
+use ArtisanToolbox\Maintainer\Versionable\Readme\Badge;
+use ArtisanToolbox\Maintainer\Versionable\Readme\Head;
 
-class Mosaicast
+final class Mosaicast implements Versionable, WithReadmeHead
 {
-    public function __construct(
-        private readonly MosaicastRequestContext $context,
-        private readonly MosaicastBroadcaster $broadcaster,
-        private readonly Request $request,
-    ) {}
+    public const string VERSION = '1.1.1';
 
-    /**
-     * @param  array<string, mixed>  $payload
-     */
-    public function dispatch(string|object $event, array $payload = []): void
+    public function readmeHead(): Head
     {
-        $this->context->initialize($this->request);
-
-        throw_unless($this->context->hasSession(), LogicException::class, 'Mosaicast events require an active session request. Use Mosaicast::toSession($sessionIdentifier)->dispatch() outside a request.');
-
-        $event = MosaicastEvent::from($event, $payload);
-
-        if ($this->context->finalized()) {
-            $this->broadcaster->dispatch($this->currentTarget(), $event);
-
-            return;
-        }
-
-        $this->context->add($event);
-    }
-
-    public function currentTarget(): SessionDeliveryTarget
-    {
-        $this->context->initialize($this->request);
-
-        return $this->context->target()
-            ?? throw new LogicException('Mosaicast cannot derive a delivery target without an active session request.');
-    }
-
-    public function currentSessionIdentifier(): string
-    {
-        return $this->currentTarget()->sessionIdentifier;
-    }
-
-    public function toSession(string $sessionIdentifier): TargetedMosaicast
-    {
-        return new TargetedMosaicast(
-            new SessionDeliveryTarget($sessionIdentifier),
-            $this->broadcaster,
-        );
+        return (new Head)
+            ->withLogo(src: 'logo/mosaicast-icon.svg', alt: '', width: 88)
+            ->withTitle('Mosaicast')
+            ->withDescription('Laravel event delivery through Inertia props or private session broadcasting.')
+            ->addBadge(Badge::releaseVersion('https://github.com/artisan-toolbox/mosaicast/releases'))
+            ->addBadge(Badge::make(
+                link: 'https://packagist.org/packages/artisan-toolbox/mosaicast',
+                imgSrc: 'https://img.shields.io/packagist/php-v/artisan-toolbox/mosaicast.svg?style=flat-square',
+                imgAlt: 'PHP from Packagist',
+            ))
+            ->addBadge(Badge::make(
+                link: 'https://github.com/artisan-toolbox/mosaicast/actions',
+                imgSrc: 'https://img.shields.io/github/actions/workflow/status/artisan-toolbox/mosaicast/tests.yml?branch=1.x&label=Tests&style=flat-square',
+                imgAlt: 'Tests',
+            ));
     }
 }

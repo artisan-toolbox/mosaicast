@@ -16,23 +16,31 @@ final class MosaicastRequestContext
 
     private bool $finalized = false;
 
+    private bool $hasInertiaEvents = false;
+
     private ?SessionDeliveryTarget $target = null;
+
+    private ?string $sessionId = null;
+
+    private ?string $sessionToken = null;
 
     public function __construct(private readonly SessionBroadcastChannel $channel) {}
 
     public function initialize(Request $request): void
     {
-        if (! $request->hasSession()) {
-            $this->target = null;
+        $session = $request->hasSession() ? $request->session() : null;
+        $sessionId = $session?->getId();
+        $sessionToken = $session?->token();
 
+        if ($sessionId === $this->sessionId && $sessionToken === $this->sessionToken) {
             return;
         }
 
-        $sessionId = $request->session()->getId();
-
-        $this->target = $sessionId === ''
+        $this->sessionId = $sessionId;
+        $this->sessionToken = $sessionToken;
+        $this->target = $sessionId === null || $sessionId === '' || $sessionToken === null || $sessionToken === ''
             ? null
-            : new SessionDeliveryTarget($this->channel->identifier($sessionId));
+            : new SessionDeliveryTarget($this->channel->identifier($sessionId, $sessionToken));
     }
 
     public function hasSession(): bool
@@ -86,9 +94,17 @@ final class MosaicastRequestContext
      */
     public function pullForInertia(): array
     {
+        $events = $this->pull();
+        $this->hasInertiaEvents = $events !== [];
+
         return array_map(
             static fn (MosaicastEvent $event): array => $event->toArray(),
-            $this->pull(),
+            $events,
         );
+    }
+
+    public function hasInertiaEvents(): bool
+    {
+        return $this->hasInertiaEvents;
     }
 }

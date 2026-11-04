@@ -32,57 +32,83 @@ function i(e) {
 	return typeof e == "object" && !!e && !Array.isArray(e);
 }
 function a(e) {
-	return i(e) && typeof e.name == "string" && e.name.length > 0 && i(e.payload);
+	if (i(e)) return e;
+	if (Array.isArray(e) && e.length === 0) return {};
 }
 function o(e) {
 	return typeof e == "string" && /^[a-f0-9]{64}$/.test(e);
 }
 function s(e) {
-	return !i(e) || !Array.isArray(e.events) ? !1 : (e.sessionIdentifier === null || o(e.sessionIdentifier)) && e.events.every(a);
+	return !i(e) || !Array.isArray(e.events) ? !1 : e.sessionIdentifier === null || o(e.sessionIdentifier);
 }
 function c(t = {}) {
 	return { install() {
-		let n = t.echo, a = t.channelPrefix ?? "mosaicast.sessions", c = t.debug === !0 ? t.logger ?? globalThis.console : void 0, l = r(), u = null, d = (e) => {
-			if (e === null && u !== null && (n?.leave(u), u = null), e !== null) {
-				c?.info("[Mosaicast] Session identifier:", e);
-				let t = `${a}.${e}`;
-				n === void 0 ? c?.error("[Mosaicast] No Echo instance was provided; private channel subscription was skipped.") : u !== t && (u !== null && n.leave(u), c?.info("[Mosaicast] Subscribing to private channel:", t), n.private(t).subscribed(() => {
-					c?.info("[Mosaicast] Private channel subscribed:", t);
+		let n = t.echo, c = t.channelPrefix ?? "mosaicast.sessions", l = t.debug === !0 ? t.logger ?? globalThis.console : void 0, u = r(), d = null, f = (e) => {
+			if (e === null && d !== null && (n?.leave(d), d = null), e !== null) {
+				l?.info("[Mosaicast] Session identifier:", e);
+				let t = `${c}.${e}`;
+				n === void 0 ? l?.error("[Mosaicast] No Echo instance was provided; private channel subscription was skipped.") : d !== t && (d !== null && n.leave(d), l?.info("[Mosaicast] Subscribing to private channel:", t), n.private(t).subscribed(() => {
+					l?.info("[Mosaicast] Private channel subscribed:", t);
 				}).error((e) => {
-					c?.error("[Mosaicast] Private channel subscription failed:", {
+					l?.error("[Mosaicast] Private channel subscription failed:", {
 						channel: t,
 						error: e
 					});
 				}).listenToAll((e, n) => {
-					if (u === t) {
-						if (!i(n)) {
-							c?.error("[Mosaicast] Ignored an invalid broadcast event payload.");
-							return;
-						}
-						c?.info("[Mosaicast] Broadcast event:", {
-							event: n,
-							eventName: e
-						}), l.emit(e, n, "broadcast");
+					if (d !== t) return;
+					let r = a(n);
+					if (r === void 0) {
+						l?.error("[Mosaicast] Ignored an invalid broadcast event payload.");
+						return;
 					}
-				}), u = t);
+					l?.info("[Mosaicast] Broadcast event:", {
+						event: n,
+						eventName: e
+					}), u.emit(e, r, "broadcast");
+				}), d = t);
 			}
-		}, f = (e, t) => {
+		}, p = (e, t) => {
 			if (e != null) {
 				if (!s(e)) {
-					c?.error("[Mosaicast] Ignored an invalid Mosaicast payload.");
+					l?.error("[Mosaicast] Ignored an invalid Mosaicast payload.");
 					return;
 				}
-				t || d(e.sessionIdentifier);
-				for (let t of e.events) c?.info("[Mosaicast] Inertia event:", {
-					event: t,
-					source: "Inertia response"
-				}), l.emit(t.name, t.payload, "inertia");
+				t || f(e.sessionIdentifier);
+				for (let t of e.events) {
+					if (!i(t) || typeof t.name != "string" || t.name.length === 0) {
+						l?.error("[Mosaicast] Ignored an invalid Mosaicast event.");
+						continue;
+					}
+					let e = a(t.payload);
+					if (e === void 0) {
+						l?.error("[Mosaicast] Ignored an invalid Mosaicast event.");
+						continue;
+					}
+					l?.info("[Mosaicast] Inertia event:", {
+						event: t,
+						source: "Inertia response"
+					}), u.emit(t.name, e, "inertia");
+				}
 			}
-		};
-		e.on("navigate", (e) => {
-			let t = e.detail.page.props, n = t.mosaicastSessionIdentifier, r = n === null || o(n);
-			r ? d(n) : n !== void 0 && c?.error("[Mosaicast] Ignored an invalid session identifier."), f(t.mosaicast, r);
+		}, m = (e) => {
+			let t = e.mosaicastSessionIdentifier, n = t === null || o(t);
+			n ? f(t) : t !== void 0 && l?.error("[Mosaicast] Ignored an invalid session identifier."), e.mosaicastHasEvents !== !1 && p(e.mosaicast, n);
+		}, h = !0, g;
+		e.on("navigate", ({ detail: e }) => {
+			if (h) {
+				h = !1;
+				let t = globalThis.performance?.getEntriesByType("navigation")[0];
+				if (t && "type" in t && t.type === "back_forward" && e.page.flash?.mosaicastInitialPage !== !0) return;
+				m(e.page.props);
+			}
+		}), e.on("beforeUpdate", ({ detail: e }) => {
+			h = !1, g = e.page.props;
 		});
+		let _ = () => {
+			let e = g;
+			g = void 0, e !== void 0 && m(e);
+		};
+		e.on("success", _), e.on("error", _);
 	} };
 }
 //#endregion

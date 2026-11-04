@@ -3,6 +3,12 @@
 ## [Unreleased]
 
 - Generate the README logo, badges, and description with Maintainer 1.9 during releases.
+- Use `ArtisanToolbox\Mosaicast\Delivery\MosaicastDispatcher` for direct dispatcher injection. The root `Mosaicast` class now holds release metadata.
+- Deliver Inertia events on same-page reloads and skip stale event props from partial responses and browser history. Fresh full-page responses still deliver events after browser back or forward navigation.
+- Deliver empty payloads as empty objects and skip malformed events without dropping valid events in the same response.
+- Register private broadcast channels when Laravel caches HTTP routes.
+- Import the Vue plugin as an ES module. The package no longer advertises a CommonJS entry that Inertia cannot load.
+- Bind private channel authorization to the session ID and CSRF token so an invalidated server-backed session cannot rejoin its old channel. Reload open clients and drain jobs targeting old channel identifiers before upgrading.
 
 ## [1.1.1] - 2026-11-04
 
@@ -49,12 +55,6 @@
 
 - **Ignore package-lock and adjust rector config** (`4d5ee73`)
   Updates repository hygiene by ignoring `package-lock.json` and adjusts the Rector configuration accordingly. This affects development tooling and automated code transformation/linting behavior. No production/library API changes are described, but contributors/CI may see differences in how Rector runs and which lockfile changes are detected.
-
-## [Unreleased]
-
-### Maintenance
-
-- Point the GitHub Actions test workflow at `1.x` instead of the retired `main` branch, while retaining CI for other version branches and pull requests.
 
 ## [1.1.0] - 2026-10-07
 
@@ -112,9 +112,7 @@ This matters because it provides an ergonomic, globally accessible entry point f
 - **Remove changelog workflow and update dependencies/documentation structure** (`d9d6a6a`)
   Removes the changelog workflow and updates dependencies, while improving the documentation structure. This matters for maintainers because it changes how changelogs are produced and how documentation is organized, likely consolidating release note/changelog generation into the new release configuration. User impact is primarily contributor-facing (release/changelog management), not runtime behavior. Compatibility considerations for users are minimal; however, maintainers should note the workflow removal and rely on the updated documentation/release setup for generating changelogs.
 
-# Release Notes
-
-## Unreleased
+## Earlier release notes
 
 - Added the `mosaicast()` PHP helper for implicit dispatch and fluent explicit session delivery with `mosaicast()->toSession(...)`.
 - Mosaicast now accepts Laravel event objects, honoring `broadcastAs()` and `broadcastWith()`.

@@ -1,16 +1,24 @@
 import { describe, expect, it, vi } from 'vite-plus/test';
 
-const { navigate } = vi.hoisted(() => ({
-    navigate: vi.fn(),
-}));
+const { on } = vi.hoisted(() => ({ on: vi.fn() }));
 
-vi.mock('@inertiajs/vue3', () => ({
-    router: {
-        on: navigate,
-    },
-}));
+vi.mock('@inertiajs/vue3', () => ({ router: { on } }));
 
 import { createMosaicast, mosaicast } from './index';
+
+function pageEvent(
+    name: string,
+    props: Record<string, unknown>,
+    flash: Record<string, unknown> = {},
+): void {
+    const call = on.mock.calls.filter(([event]) => event === name).at(-1);
+    call?.[1]({ detail: { page: { props, flash } } });
+}
+
+function response(props: Record<string, unknown>, result = 'success'): void {
+    pageEvent('beforeUpdate', props);
+    pageEvent(result, props);
+}
 
 describe('createMosaicast', () => {
     it('processes the initial Inertia navigation and subscribes to its private session channel', () => {
@@ -42,23 +50,11 @@ describe('createMosaicast', () => {
             logger,
         }).install?.({} as never);
 
-        expect(navigate).toHaveBeenCalledWith('navigate', expect.any(Function));
-
-        const onNavigate = navigate.mock.calls[0][1] as (event: {
-            detail: { page: { props: { mosaicast: unknown } } };
-        }) => void;
-
-        onNavigate({
-            detail: {
-                page: {
-                    props: {
-                        mosaicast: {
-                            sessionIdentifier:
-                                '9c9206cc5d38f284d87ca2cb6ad30b6c63a948b9960773742634793ed99f2681',
-                            events: [{ name: 'orders.updated', payload: { orderId: 123 } }],
-                        },
-                    },
-                },
+        pageEvent('navigate', {
+            mosaicast: {
+                sessionIdentifier:
+                    '9c9206cc5d38f284d87ca2cb6ad30b6c63a948b9960773742634793ed99f2681',
+                events: [{ name: 'orders.updated', payload: { orderId: 123 } }],
             },
         });
 
@@ -83,21 +79,17 @@ describe('createMosaicast', () => {
         expect(listener).toHaveBeenCalledWith({ orderId: 123 }, 'inertia');
 
         onBroadcast?.('.orders.updated', { orderId: 456 });
+        onBroadcast?.('.orders.updated', []);
 
         expect(listener).toHaveBeenCalledWith({ orderId: 456 }, 'broadcast');
+        expect(listener).toHaveBeenCalledWith({}, 'broadcast');
 
         stop();
-        onNavigate({
-            detail: {
-                page: {
-                    props: {
-                        mosaicast: {
-                            sessionIdentifier:
-                                '9c9206cc5d38f284d87ca2cb6ad30b6c63a948b9960773742634793ed99f2681',
-                            events: [{ name: 'orders.updated', payload: { orderId: 789 } }],
-                        },
-                    },
-                },
+        response({
+            mosaicast: {
+                sessionIdentifier:
+                    '9c9206cc5d38f284d87ca2cb6ad30b6c63a948b9960773742634793ed99f2681',
+                events: [{ name: 'orders.updated', payload: { orderId: 789 } }],
             },
         });
 
@@ -105,7 +97,80 @@ describe('createMosaicast', () => {
             event: { name: 'orders.updated', payload: { orderId: 789 } },
             source: 'Inertia response',
         });
-        expect(listener).toHaveBeenCalledTimes(2);
+        expect(listener).toHaveBeenCalledTimes(3);
+    });
+
+    it('delivers empty payloads and valid siblings when a response replaces the page', () => {
+        const listener = vi.fn();
+        const stop = mosaicast().on('orders.updated', listener);
+        createMosaicast().install?.({} as never);
+
+        response(
+            {
+                mosaicastHasEvents: true,
+                mosaicast: {
+                    sessionIdentifier: null,
+                    events: [
+                        { name: 'orders.updated', payload: [] },
+                        { name: 'orders.updated', payload: null },
+                        { name: 'orders.updated', payload: { orderId: 123 } },
+                    ],
+                },
+            },
+            'error',
+        );
+
+        expect(listener.mock.calls).toEqual([
+            [{}, 'inertia'],
+            [{ orderId: 123 }, 'inertia'],
+        ]);
+        stop();
+    });
+
+    it('ignores retained event props on a partial response and history navigation', () => {
+        const listener = vi.fn();
+        const stop = mosaicast().on('orders.updated', listener);
+        createMosaicast().install?.({} as never);
+        const props = {
+            mosaicastHasEvents: true,
+            mosaicast: {
+                sessionIdentifier: null,
+                events: [{ name: 'orders.updated', payload: { orderId: 123 } }],
+            },
+        };
+
+        pageEvent('navigate', props);
+        response({ ...props, mosaicastHasEvents: false });
+        pageEvent('navigate', structuredClone(props));
+
+        expect(listener).toHaveBeenCalledExactlyOnceWith({ orderId: 123 }, 'inertia');
+        stop();
+    });
+
+    it('delivers a fresh document on back/forward without replaying restored history', () => {
+        const listener = vi.fn();
+        const stop = mosaicast().on('orders.updated', listener);
+        const props = {
+            mosaicastHasEvents: true,
+            mosaicast: {
+                sessionIdentifier: null,
+                events: [{ name: 'orders.updated', payload: { orderId: 123 } }],
+            },
+        };
+        vi.stubGlobal('performance', { getEntriesByType: () => [{ type: 'back_forward' }] });
+
+        try {
+            createMosaicast().install?.({} as never);
+            pageEvent('navigate', props);
+            expect(listener).not.toHaveBeenCalled();
+
+            createMosaicast().install?.({} as never);
+            pageEvent('navigate', props, { mosaicastInitialPage: true });
+            expect(listener).toHaveBeenCalledExactlyOnceWith({ orderId: 123 }, 'inertia');
+        } finally {
+            vi.unstubAllGlobals();
+            stop();
+        }
     });
 
     it('removes a listener with off()', () => {
@@ -145,21 +210,11 @@ describe('createMosaicast', () => {
 
         createMosaicast({ logger }).install?.({} as never);
 
-        const onNavigate = navigate.mock.calls.at(-1)?.[1] as (event: {
-            detail: { page: { props: { mosaicast: unknown } } };
-        }) => void;
-
-        onNavigate({
-            detail: {
-                page: {
-                    props: {
-                        mosaicast: {
-                            sessionIdentifier:
-                                '9c9206cc5d38f284d87ca2cb6ad30b6c63a948b9960773742634793ed99f2681',
-                            events: [{ name: 'orders.updated', payload: { orderId: 123 } }],
-                        },
-                    },
-                },
+        pageEvent('navigate', {
+            mosaicast: {
+                sessionIdentifier:
+                    '9c9206cc5d38f284d87ca2cb6ad30b6c63a948b9960773742634793ed99f2681',
+                events: [{ name: 'orders.updated', payload: { orderId: 123 } }],
             },
         });
 
@@ -172,20 +227,10 @@ describe('createMosaicast', () => {
 
         createMosaicast({ debug: true, logger }).install?.({} as never);
 
-        const onNavigate = navigate.mock.calls.at(-1)?.[1] as (event: {
-            detail: { page: { props: { mosaicast: unknown } } };
-        }) => void;
-
-        onNavigate({
-            detail: {
-                page: {
-                    props: {
-                        mosaicast: {
-                            sessionIdentifier: 'not-a-session-identifier',
-                            events: [],
-                        },
-                    },
-                },
+        pageEvent('navigate', {
+            mosaicast: {
+                sessionIdentifier: 'not-a-session-identifier',
+                events: [],
             },
         });
 
@@ -206,21 +251,11 @@ describe('createMosaicast', () => {
 
         createMosaicast({ echo, channelPrefix: 'custom.sessions' }).install?.({} as never);
 
-        const onNavigate = navigate.mock.calls.at(-1)?.[1] as (event: {
-            detail: { page: { props: { mosaicast: unknown } } };
-        }) => void;
-
-        onNavigate({
-            detail: {
-                page: {
-                    props: {
-                        mosaicast: {
-                            sessionIdentifier:
-                                '9c9206cc5d38f284d87ca2cb6ad30b6c63a948b9960773742634793ed99f2681',
-                            events: [],
-                        },
-                    },
-                },
+        pageEvent('navigate', {
+            mosaicast: {
+                sessionIdentifier:
+                    '9c9206cc5d38f284d87ca2cb6ad30b6c63a948b9960773742634793ed99f2681',
+                events: [],
             },
         });
 
@@ -241,28 +276,14 @@ describe('createMosaicast', () => {
 
         createMosaicast({ echo }).install?.({} as never);
 
-        const onNavigate = navigate.mock.calls.at(-1)?.[1] as (event: {
-            detail: { page: { props: { mosaicast: unknown } } };
-        }) => void;
-
-        onNavigate({
-            detail: {
-                page: {
-                    props: {
-                        mosaicast: {
-                            sessionIdentifier:
-                                '9c9206cc5d38f284d87ca2cb6ad30b6c63a948b9960773742634793ed99f2681',
-                            events: [],
-                        },
-                    },
-                },
+        pageEvent('navigate', {
+            mosaicast: {
+                sessionIdentifier:
+                    '9c9206cc5d38f284d87ca2cb6ad30b6c63a948b9960773742634793ed99f2681',
+                events: [],
             },
         });
-        onNavigate({
-            detail: {
-                page: { props: { mosaicast: { sessionIdentifier: null, events: [] } } },
-            },
-        });
+        response({ mosaicast: { sessionIdentifier: null, events: [] } });
 
         expect(echo.leave).toHaveBeenCalledWith(
             'mosaicast.sessions.9c9206cc5d38f284d87ca2cb6ad30b6c63a948b9960773742634793ed99f2681',
@@ -288,15 +309,8 @@ describe('createMosaicast', () => {
 
         createMosaicast({ echo }).install?.({} as never);
 
-        const onNavigate = navigate.mock.calls.at(-1)?.[1] as (event: {
-            detail: { page: { props: { mosaicast: unknown } } };
-        }) => void;
         const navigateTo = (sessionIdentifier: string): void =>
-            onNavigate({
-                detail: {
-                    page: { props: { mosaicast: { sessionIdentifier, events: [] } } },
-                },
-            });
+            response({ mosaicast: { sessionIdentifier, events: [] } });
 
         navigateTo('9c9206cc5d38f284d87ca2cb6ad30b6c63a948b9960773742634793ed99f2681');
         navigateTo('84367bb1439cbe1e5018b7075eb748e952038ce1cee777ce4d20b0f60f657558');
@@ -322,33 +336,17 @@ describe('createMosaicast', () => {
 
         createMosaicast({ echo }).install?.({} as never);
 
-        const onNavigate = navigate.mock.calls.at(-1)?.[1] as (event: {
-            detail: { page: { props: Record<string, unknown> } };
-        }) => void;
-
-        onNavigate({
-            detail: {
-                page: {
-                    props: {
-                        mosaicast: {
-                            sessionIdentifier:
-                                '9c9206cc5d38f284d87ca2cb6ad30b6c63a948b9960773742634793ed99f2681',
-                            events: [],
-                        },
-                    },
-                },
+        pageEvent('navigate', {
+            mosaicast: {
+                sessionIdentifier:
+                    '9c9206cc5d38f284d87ca2cb6ad30b6c63a948b9960773742634793ed99f2681',
+                events: [],
             },
         });
-        onNavigate({
-            detail: {
-                page: {
-                    props: {
-                        orders: [],
-                        mosaicastSessionIdentifier:
-                            '84367bb1439cbe1e5018b7075eb748e952038ce1cee777ce4d20b0f60f657558',
-                    },
-                },
-            },
+        response({
+            orders: [],
+            mosaicastSessionIdentifier:
+                '84367bb1439cbe1e5018b7075eb748e952038ce1cee777ce4d20b0f60f657558',
         });
 
         expect(echo.leave).toHaveBeenCalledWith(

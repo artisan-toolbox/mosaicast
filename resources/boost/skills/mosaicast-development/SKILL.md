@@ -65,7 +65,7 @@ import { echo } from '@laravel/echo-vue';
 import type { App } from 'vue';
 
 export function attachMosaicast(app: App): () => void {
-  app.use(createMosaicast({ echo: echo() }));
+  app.use(createMosaicast({ echo: echo<'reverb'>() }));
 
   return mosaicast().on('orders.updated', (payload, source) => {
     console.log(payload.orderId, source);

@@ -8,6 +8,7 @@ use ArtisanToolbox\Mosaicast\Actions\ResolveMosaicastPayload;
 use ArtisanToolbox\Mosaicast\Auth\SessionBroadcastGuard;
 use ArtisanToolbox\Mosaicast\Broadcasting\SessionBroadcastChannel;
 use ArtisanToolbox\Mosaicast\Delivery\MosaicastBroadcaster;
+use ArtisanToolbox\Mosaicast\Delivery\MosaicastDispatcher;
 use ArtisanToolbox\Mosaicast\Http\MosaicastRequestContext;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Foundation\Application;
@@ -27,8 +28,9 @@ class MosaicastServiceProvider extends ServiceProvider
         $this->mergeConfigFrom(__DIR__.'/../config/mosaicast.php', 'mosaicast');
 
         $this->app->scoped(MosaicastRequestContext::class);
+        $this->app->scoped(ResolveMosaicastPayload::class);
 
-        $this->app->scoped(Mosaicast::class);
+        $this->app->scoped(MosaicastDispatcher::class);
 
         $this->app->singleton(
             SessionBroadcastChannel::class,
@@ -77,6 +79,12 @@ class MosaicastServiceProvider extends ServiceProvider
                 fn (): array => resolve(ResolveMosaicastPayload::class)
                     ->handle(resolve(Request::class)),
             );
+
+            // Inertia resolves shared props in order. Read the flag after the event prop.
+            Inertia::share(
+                'mosaicastHasEvents',
+                Inertia::always(fn (): bool => resolve(MosaicastRequestContext::class)->hasInertiaEvents()),
+            );
         }
 
         $events = $this->app->make(Dispatcher::class);
@@ -98,7 +106,7 @@ class MosaicastServiceProvider extends ServiceProvider
             }
         });
 
-        $this->loadRoutesFrom(__DIR__.'/../routes/mosaicast.php');
+        require __DIR__.'/../routes/mosaicast.php';
 
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'mosaicast');
 

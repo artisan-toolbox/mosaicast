@@ -19,16 +19,18 @@ final readonly class SessionBroadcastChannel
         throw_if($this->prefix === '', InvalidArgumentException::class, 'The session broadcast channel prefix must not be empty.');
     }
 
-    public function identifier(string $sessionId): string
+    public function identifier(string $sessionId, string $sessionToken): string
     {
         throw_if($sessionId === '', InvalidArgumentException::class, 'The session ID must not be empty.');
 
-        return hash_hmac('sha256', $sessionId, $this->key);
+        throw_if($sessionToken === '', InvalidArgumentException::class, 'The session token must not be empty.');
+
+        return hash_hmac('sha256', $sessionId."\0".$sessionToken, $this->key);
     }
 
-    public function name(string $sessionId): string
+    public function name(string $sessionId, string $sessionToken): string
     {
-        return $this->nameForIdentifier($this->identifier($sessionId));
+        return $this->nameForIdentifier($this->identifier($sessionId, $sessionToken));
     }
 
     public function nameForIdentifier(string $sessionIdentifier): string

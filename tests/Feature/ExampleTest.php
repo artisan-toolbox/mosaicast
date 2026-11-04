@@ -2,14 +2,16 @@
 
 declare(strict_types=1);
 
-use ArtisanToolbox\Mosaicast\Mosaicast;
+use ArtisanToolbox\Mosaicast\Delivery\MosaicastDispatcher;
+use ArtisanToolbox\Mosaicast\Facades\Mosaicast;
 
-it('resolves the singleton', function () {
-    expect(resolve(Mosaicast::class))->toBeInstanceOf(Mosaicast::class);
-});
+it('shares the scoped dispatcher between the container, facade, and helper', function (): void {
+    $dispatcher = resolve(MosaicastDispatcher::class);
 
-it('returns the same instance from the container', function () {
-    expect(resolve(Mosaicast::class))->toBe(resolve(Mosaicast::class));
+    expect($dispatcher)->toBeInstanceOf(MosaicastDispatcher::class)
+        ->and(resolve(MosaicastDispatcher::class))->toBe($dispatcher)
+        ->and(Mosaicast::getFacadeRoot())->toBe($dispatcher)
+        ->and(mosaicast())->toBe($dispatcher);
 });
 
 it('merges the package configuration', function (): void {

@@ -6,15 +6,9 @@ export default defineConfig({
     build: {
         lib: {
             entry: resolve(import.meta.dirname, 'resources/js/index.ts'),
-            formats: ['es', 'cjs', 'iife'],
+            formats: ['es', 'iife'],
             name: 'Mosaicast',
-            fileName: (format) => {
-                if (format === 'cjs') {
-                    return 'index.common.js';
-                }
-
-                return format === 'es' ? 'index.js' : 'mosaicast.iife.js';
-            },
+            fileName: (format) => (format === 'es' ? 'index.js' : 'mosaicast.iife.js'),
         },
         rollupOptions: {
             external: ['@inertiajs/vue3', 'vue'],

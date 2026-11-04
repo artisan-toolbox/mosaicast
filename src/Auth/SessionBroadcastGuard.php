@@ -14,6 +14,10 @@ final class SessionBroadcastGuard implements Guard
 {
     private ?Authenticatable $user = null;
 
+    private ?string $sessionId = null;
+
+    private ?string $sessionToken = null;
+
     public function __construct(
         private Request $request,
         private readonly SessionBroadcastChannel $channel,
@@ -31,22 +35,23 @@ final class SessionBroadcastGuard implements Guard
 
     public function user(): ?Authenticatable
     {
-        if ($this->user !== null) {
+        $session = $this->request->hasSession() ? $this->request->session() : null;
+        $sessionId = $session?->getId();
+        $sessionToken = $session?->token();
+
+        if ($sessionId === $this->sessionId && $sessionToken === $this->sessionToken) {
             return $this->user;
         }
 
-        if (! $this->request->hasSession()) {
-            return null;
-        }
+        $this->sessionId = $sessionId;
+        $this->sessionToken = $sessionToken;
 
-        $sessionId = $this->request->session()->getId();
-
-        if ($sessionId === '') {
-            return null;
+        if ($sessionId === null || $sessionId === '' || $sessionToken === null || $sessionToken === '') {
+            return $this->user = null;
         }
 
         return $this->user = new GenericUser([
-            'id' => $this->channel->identifier($sessionId),
+            'id' => $this->channel->identifier($sessionId, $sessionToken),
             'password' => '',
             'remember_token' => null,
         ]);
@@ -69,11 +74,12 @@ final class SessionBroadcastGuard implements Guard
 
     public function hasUser(): bool
     {
-        return $this->user !== null;
+        return $this->user !== null && $this->user() !== null;
     }
 
     public function setUser(Authenticatable $user): static
     {
+        $this->user();
         $this->user = $user;
 
         return $this;
@@ -83,6 +89,8 @@ final class SessionBroadcastGuard implements Guard
     {
         $this->request = $request;
         $this->user = null;
+        $this->sessionId = null;
+        $this->sessionToken = null;
 
         return $this;
     }

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use ArtisanToolbox\Mosaicast\Mosaicast;
+use ArtisanToolbox\Mosaicast\Delivery\MosaicastDispatcher;
 
 if (! function_exists('mosaicast')) {
     /**
@@ -13,9 +13,9 @@ if (! function_exists('mosaicast')) {
      *
      * @param  array<string, mixed>  $payload
      */
-    function mosaicast(string|object|null $event = null, array $payload = []): Mosaicast
+    function mosaicast(string|object|null $event = null, array $payload = []): MosaicastDispatcher
     {
-        $mosaicast = resolve(Mosaicast::class);
+        $mosaicast = resolve(MosaicastDispatcher::class);
 
         if ($event !== null) {
             $mosaicast->dispatch($event, $payload);

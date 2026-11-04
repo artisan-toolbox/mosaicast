@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace ArtisanToolbox\Mosaicast\Concerns;
 
-use ArtisanToolbox\Mosaicast\Mosaicast;
+use ArtisanToolbox\Mosaicast\Delivery\MosaicastDispatcher;
 use ReflectionClass;
 
 /**
@@ -16,6 +16,6 @@ trait DispatchesMosaicast
     {
         $event = (new ReflectionClass(static::class))->newInstanceArgs($arguments);
 
-        resolve(Mosaicast::class)->dispatch($event);
+        resolve(MosaicastDispatcher::class)->dispatch($event);
     }
 }

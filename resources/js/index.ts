@@ -118,28 +118,28 @@ function isRecord(value: unknown): value is Record<string, unknown> {
     return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
-function isMosaicastEvent(value: unknown): value is MosaicastEvent {
-    return (
-        isRecord(value) &&
-        typeof value.name === 'string' &&
-        value.name.length > 0 &&
-        isRecord(value.payload)
-    );
+function eventPayload(value: unknown): Record<string, unknown> | undefined {
+    if (isRecord(value)) {
+        return value;
+    }
+
+    if (Array.isArray(value) && value.length === 0) {
+        return {};
+    }
 }
 
 function isSessionIdentifier(value: unknown): value is string {
     return typeof value === 'string' && /^[a-f0-9]{64}$/.test(value);
 }
 
-function isMosaicastPayload(value: unknown): value is MosaicastPayload {
+function isMosaicastPayload(
+    value: unknown,
+): value is { sessionIdentifier: string | null; events: unknown[] } {
     if (!isRecord(value) || !Array.isArray(value.events)) {
         return false;
     }
 
-    return (
-        (value.sessionIdentifier === null || isSessionIdentifier(value.sessionIdentifier)) &&
-        value.events.every(isMosaicastEvent)
-    );
+    return value.sessionIdentifier === null || isSessionIdentifier(value.sessionIdentifier);
 }
 
 /**
@@ -194,7 +194,9 @@ export function createMosaicast(options: MosaicastPluginOptions = {}): Plugin {
                                     return;
                                 }
 
-                                if (!isRecord(event)) {
+                                const payload = eventPayload(event);
+
+                                if (payload === undefined) {
                                     logger?.error(
                                         '[Mosaicast] Ignored an invalid broadcast event payload.',
                                     );
@@ -207,7 +209,7 @@ export function createMosaicast(options: MosaicastPluginOptions = {}): Plugin {
                                     eventName,
                                 });
 
-                                mosaicastClient.emit(eventName, event, 'broadcast');
+                                mosaicastClient.emit(eventName, payload, 'broadcast');
                             });
 
                         subscribedChannel = channel;
@@ -231,32 +233,84 @@ export function createMosaicast(options: MosaicastPluginOptions = {}): Plugin {
                 }
 
                 for (const event of payload.events) {
+                    if (
+                        !isRecord(event) ||
+                        typeof event.name !== 'string' ||
+                        event.name.length === 0
+                    ) {
+                        logger?.error('[Mosaicast] Ignored an invalid Mosaicast event.');
+                        continue;
+                    }
+
+                    const data = eventPayload(event.payload);
+
+                    if (data === undefined) {
+                        logger?.error('[Mosaicast] Ignored an invalid Mosaicast event.');
+                        continue;
+                    }
+
                     logger?.info('[Mosaicast] Inertia event:', {
                         event,
                         source: 'Inertia response',
                     });
 
-                    mosaicastClient.emit(event.name, event.payload, 'inertia');
+                    mosaicastClient.emit(event.name, data, 'inertia');
                 }
             };
 
-            router.on('navigate', (event): void => {
-                const props = event.detail.page.props as {
-                    mosaicast?: unknown;
-                    mosaicastSessionIdentifier?: unknown;
-                };
+            const consumePage = (props: Record<string, unknown>): void => {
                 const sessionIdentifier = props.mosaicastSessionIdentifier;
                 const sessionSynchronized =
                     sessionIdentifier === null || isSessionIdentifier(sessionIdentifier);
 
                 if (sessionSynchronized) {
-                    synchronizeSession(sessionIdentifier as string | null);
+                    synchronizeSession(sessionIdentifier);
                 } else if (sessionIdentifier !== undefined) {
                     logger?.error('[Mosaicast] Ignored an invalid session identifier.');
                 }
 
-                consume(props.mosaicast, sessionSynchronized);
+                if (props.mosaicastHasEvents !== false) {
+                    consume(props.mosaicast, sessionSynchronized);
+                }
+            };
+
+            let initialPage = true;
+            let pendingProps: Record<string, unknown> | undefined;
+
+            router.on('navigate', ({ detail }): void => {
+                if (initialPage) {
+                    initialPage = false;
+                    const navigation = globalThis.performance?.getEntriesByType('navigation')[0];
+
+                    if (
+                        navigation &&
+                        'type' in navigation &&
+                        navigation.type === 'back_forward' &&
+                        detail.page.flash?.mosaicastInitialPage !== true
+                    ) {
+                        return;
+                    }
+
+                    consumePage(detail.page.props);
+                }
             });
+
+            router.on('beforeUpdate', ({ detail }): void => {
+                initialPage = false;
+                pendingProps = detail.page.props;
+            });
+
+            const consumeResponse = (): void => {
+                const props = pendingProps;
+                pendingProps = undefined;
+
+                if (props !== undefined) {
+                    consumePage(props);
+                }
+            };
+
+            router.on('success', consumeResponse);
+            router.on('error', consumeResponse);
         },
     };
 }
