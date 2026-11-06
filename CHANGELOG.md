@@ -1,5 +1,41 @@
 # Changelog
 
+## [1.2.1] - 2026-11-06
+
+### Maintenance
+
+- **Align tooling versions and update documentation links** (`afe1435`)
+  This change aligns the project’s developer toolchain and CI expectations, and updates documentation/metadata links to the new documentation domain.
+
+- Updated contributor documentation in `.github/CONTRIBUTING.md` to require PHP 8.5 and Node.js 24.11+ (Node 24 series) for development, matching the CI environment.
+- Clarified the recommended local install order from the repo root: run Composer first and then `npm ci` after `composer install`.
+- Added documented CI-style check and build commands, including running `php vendor/bin/maintainer quality:check --no-interaction` and `npm run build`.
+- Documented what the quality checks cover (PHP tests/format/static analysis/frontend tests and TypeScript) and what the frontend build produces (ESM client, IIFE bundle, and type declarations in `dist/`).
+- Provided guidance to keep `vite+` and the `overrides.vite`/`overrides.vitest` versions aligned with the bundled Vite+ and Vitest versions, including updating the lockfile and `dist/` together.
+
+- Updated security contact info in `.github/SECURITY.md`, changing the security email from `allan@wss.group` to `contact@atb.dev.br` (documentation-only; no code/API impact).
+- Added detailed contributor guidance in `AGENTS.md` around documentation quality and consumer examples, including stricter expectations for root-cause fixes, synchronization of legacy/Vue docs, and fully specified working example prerequisites and steps.
+
+- Updated `CHANGELOG.md` with an `[Unreleased]` section reflecting tooling alignment requirements:
+  - Ensures Vite+ 1.5.0, its core alias, and bundled Vitest 5.1.0 remain aligned for frontend tests and distribution builds.
+  - Notes dependency constraints requiring Artisan Toolbox Maintainer >=1.11 and Core >=1.1.
+  - Updates public documentation links and contact metadata to `https://atb.dev.br` and `contact@atb.dev.br`.
+
+- Branding/docs link updates (no runtime behavior changes):
+  - `README` badges and resource links now target `https://atb.dev.br` instead of `https://artisantoolbox.wsssoftware.com.br`.
+  - `TODO.md` updates the referenced Mosaicast guide and Inertia delivery guide URLs to `https://atb.dev.br`.
+  - `resources/boost/.../SKILL.md` updates “Read before executing” dependency URLs to `https://atb.dev.br`.
+  - `tests/Unit/MosaicastMetadataTest.php` updates expected GitHub badge URLs to `https://atb.dev.br` (test-only domain change).
+
+- Metadata and dependency alignment:
+  - `composer.json`: updated author email to `contact@atb.dev.br` and bumped `artisan-toolbox/maintainer` to `^1.11.0` and `artisan-toolbox/core` to `^1.1.0`.
+  - `package.json`: updated dev tooling to `vite-plus` 1.5.0 and `vite-plugin-dts` ^5.1.2; adjusted overrides so `vite` uses `@voidzero-dev/vite-plus-core@1.5.0` and `vitest` is pinned to 5.1.0; added `allowScripts` for `fsevents@2.3.3: true`; kept `engines.node >=20` and `packageManager: npm@11.17.0`.
+
+User impact / compatibility notes:
+- No public API/runtime behavior changes are implied by the fragments, but the updated Node.js (24.11+) and PHP (8.5) requirements can affect contributor/developer environment compatibility.
+- Tooling upgrades (Vite+/Vitest/type generation) may indirectly affect build/test outcomes.
+- Documentation/branding URL changes may require users to update bookmarks or external links that referenced the old domain.
+
 ## [Unreleased]
 
 ### Fixes
