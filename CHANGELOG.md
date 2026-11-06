@@ -22,7 +22,7 @@
   - Updates public documentation links and contact metadata to `https://atb.dev.br` and `contact@atb.dev.br`.
 
 - Branding/docs link updates (no runtime behavior changes):
-  - `README` badges and resource links now target `https://atb.dev.br` instead of `https://artisantoolbox.wsssoftware.com.br`.
+  - `README` badges and resource links now target `https://atb.dev.br`.
   - `TODO.md` updates the referenced Mosaicast guide and Inertia delivery guide URLs to `https://atb.dev.br`.
   - `resources/boost/.../SKILL.md` updates “Read before executing” dependency URLs to `https://atb.dev.br`.
   - `tests/Unit/MosaicastMetadataTest.php` updates expected GitHub badge URLs to `https://atb.dev.br` (test-only domain change).
