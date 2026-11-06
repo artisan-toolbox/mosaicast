@@ -1,5 +1,5 @@
 import { router as e } from "@inertiajs/vue3";
-//#region resources/js/index.ts
+// resources/js/index.ts
 var t = class {
 	listeners = /* @__PURE__ */ new Map();
 	on(e, t) {
@@ -57,37 +57,28 @@ function c(t = {}) {
 				}).listenToAll((e, n) => {
 					if (d !== t) return;
 					let r = a(n);
-					if (r === void 0) {
-						l?.error("[Mosaicast] Ignored an invalid broadcast event payload.");
-						return;
-					}
-					l?.info("[Mosaicast] Broadcast event:", {
+					r === void 0 ? l?.error("[Mosaicast] Ignored an invalid broadcast event payload.") : (l?.info("[Mosaicast] Broadcast event:", {
 						event: n,
 						eventName: e
-					}), u.emit(e, r, "broadcast");
+					}), u.emit(e, r, "broadcast"));
 				}), d = t);
 			}
 		}, p = (e, t) => {
 			if (e != null) {
-				if (!s(e)) {
-					l?.error("[Mosaicast] Ignored an invalid Mosaicast payload.");
-					return;
-				}
-				t || f(e.sessionIdentifier);
-				for (let t of e.events) {
-					if (!i(t) || typeof t.name != "string" || t.name.length === 0) {
-						l?.error("[Mosaicast] Ignored an invalid Mosaicast event.");
-						continue;
+				if (!s(e)) l?.error("[Mosaicast] Ignored an invalid Mosaicast payload.");
+				else {
+					t || f(e.sessionIdentifier);
+					for (let t of e.events) {
+						if (!i(t) || typeof t.name != "string" || t.name.length === 0) {
+							l?.error("[Mosaicast] Ignored an invalid Mosaicast event.");
+							continue;
+						}
+						let e = a(t.payload);
+						e === void 0 ? l?.error("[Mosaicast] Ignored an invalid Mosaicast event.") : (l?.info("[Mosaicast] Inertia event:", {
+							event: t,
+							source: "Inertia response"
+						}), u.emit(t.name, e, "inertia"));
 					}
-					let e = a(t.payload);
-					if (e === void 0) {
-						l?.error("[Mosaicast] Ignored an invalid Mosaicast event.");
-						continue;
-					}
-					l?.info("[Mosaicast] Inertia event:", {
-						event: t,
-						source: "Inertia response"
-					}), u.emit(t.name, e, "inertia");
 				}
 			}
 		}, m = (e) => {
@@ -111,5 +102,4 @@ function c(t = {}) {
 		e.on("success", _), e.on("error", _);
 	} };
 }
-//#endregion
 export { t as MosaicastClient, c as createMosaicast, r as mosaicast };

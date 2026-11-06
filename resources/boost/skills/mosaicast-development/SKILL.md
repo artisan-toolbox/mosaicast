@@ -42,10 +42,10 @@ Use this skill when a Laravel application needs to integrate the Mosaicast packa
 
 Read before executing:
 
-- `https://artisantoolbox.wsssoftware.com.br/packages/mosaicast/`
-- `https://artisantoolbox.wsssoftware.com.br/packages/mosaicast/inertia-delivery/`
-- `https://artisantoolbox.wsssoftware.com.br/packages/mosaicast/session-channels/`
-- `https://artisantoolbox.wsssoftware.com.br/packages/mosaicast/vue-plugin/`
+- `https://atb.dev.br/packages/mosaicast/`
+- `https://atb.dev.br/packages/mosaicast/inertia-delivery/`
+- `https://atb.dev.br/packages/mosaicast/session-channels/`
+- `https://atb.dev.br/packages/mosaicast/vue-plugin/`
 
 ## Examples
 

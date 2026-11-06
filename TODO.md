@@ -1,6 +1,6 @@
 # Mosaicast Engineering Checklist
 
-The implemented behavior is documented in the [central Mosaicast guide](https://artisantoolbox.wsssoftware.com.br/packages/mosaicast/). This checklist tracks follow-up coverage and design work; it is not a second API reference.
+The implemented behavior is documented in the [central Mosaicast guide](https://atb.dev.br/packages/mosaicast/). This checklist tracks follow-up coverage and design work; it is not a second API reference.
 
 ## Implemented
 
@@ -30,4 +30,4 @@ The implemented behavior is documented in the [central Mosaicast guide](https://
 - [ ] Review the public API and compatibility matrix before future releases.
 - [ ] Keep the PHP `VERSION` constant, JavaScript manifest version, and Git release tags aligned when preparing a release.
 
-Broadcasting cannot replay an event sent before the browser subscribes. In particular, a partial Inertia response that rotates the session but omits the event prop can send a fallback broadcast before the Vue client joins the new channel. The [delivery guide](https://artisantoolbox.wsssoftware.com.br/packages/mosaicast/inertia-delivery/) explains the current mitigation.
+Broadcasting cannot replay an event sent before the browser subscribes. In particular, a partial Inertia response that rotates the session but omits the event prop can send a fallback broadcast before the Vue client joins the new channel. The [delivery guide](https://atb.dev.br/packages/mosaicast/inertia-delivery/) explains the current mitigation.

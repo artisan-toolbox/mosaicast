@@ -6,10 +6,10 @@
 
 <p id="maintainer-badges" align="center">
 <a href="https://github.com/artisan-toolbox/mosaicast/releases"><img src="https://img.shields.io/github/v/release/artisan-toolbox/mosaicast?label=Release&amp;style=flat-square" alt="Release"></a>
-<a href="https://artisantoolbox.wsssoftware.com.br/packages/mosaicast/#requirements"><img src="https://img.shields.io/badge/PHP-%5E8.5-777BB4?style=flat-square" alt="PHP"></a>
-<a href="https://artisantoolbox.wsssoftware.com.br/packages/mosaicast/#requirements"><img src="https://img.shields.io/badge/Laravel-13-FF2D20?style=flat-square" alt="Laravel"></a>
+<a href="https://atb.dev.br/packages/mosaicast/#requirements"><img src="https://img.shields.io/badge/PHP-%5E8.5-777BB4?style=flat-square" alt="PHP"></a>
+<a href="https://atb.dev.br/packages/mosaicast/#requirements"><img src="https://img.shields.io/badge/Laravel-13-FF2D20?style=flat-square" alt="Laravel"></a>
 <a href="https://github.com/artisan-toolbox/mosaicast/actions/workflows/tests.yml?query=branch%3A1.x"><img src="https://img.shields.io/github/actions/workflow/status/artisan-toolbox/mosaicast/tests.yml?branch=1.x&amp;label=Tests&amp;style=flat-square" alt="Tests"></a>
-<a href="https://artisantoolbox.wsssoftware.com.br/packages/mosaicast/"><img src="https://img.shields.io/badge/Docs-Read-blue?style=flat-square" alt="Docs"></a>
+<a href="https://atb.dev.br/packages/mosaicast/"><img src="https://img.shields.io/badge/Docs-Read-blue?style=flat-square" alt="Docs"></a>
 </p>
 
 <p id="maintainer-description" align="center">
@@ -42,11 +42,11 @@ Mosaicast::dispatch('orders.updated', [
 The `mosaicast()` helper offers the same implicit dispatch API. Call it without
 an event to target a captured session explicitly: `mosaicast()->toSession($identifier)->dispatch(...)`.
 
-An Inertia response that resolves the `mosaicast` shared prop carries the event in `mosaicast.events`. Other responses use the current session's private broadcast channel. See the [complete documentation](https://artisantoolbox.wsssoftware.com.br/packages/mosaicast/) for jobs, event objects, channel authorization, and the Vue client.
+An Inertia response that resolves the `mosaicast` shared prop carries the event in `mosaicast.events`. Other responses use the current session's private broadcast channel. See the [complete documentation](https://atb.dev.br/packages/mosaicast/) for jobs, event objects, channel authorization, and the Vue client.
 
 ## Resources
 
-- [Documentation](https://artisantoolbox.wsssoftware.com.br/packages/mosaicast/)
+- [Documentation](https://atb.dev.br/packages/mosaicast/)
 - [Changelog](CHANGELOG.md)
 - [Contributing](.github/CONTRIBUTING.md)
 - [Security policy](.github/SECURITY.md)

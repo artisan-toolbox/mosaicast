@@ -25,12 +25,12 @@ final class Mosaicast implements Versionable, WithReadmeHead
                 imgAlt: 'Release',
             ))
             ->addBadge(Badge::make(
-                link: 'https://artisantoolbox.wsssoftware.com.br/packages/mosaicast/#requirements',
+                link: 'https://atb.dev.br/packages/mosaicast/#requirements',
                 imgSrc: 'https://img.shields.io/badge/PHP-%5E8.5-777BB4?style=flat-square',
                 imgAlt: 'PHP',
             ))
             ->addBadge(Badge::make(
-                link: 'https://artisantoolbox.wsssoftware.com.br/packages/mosaicast/#requirements',
+                link: 'https://atb.dev.br/packages/mosaicast/#requirements',
                 imgSrc: 'https://img.shields.io/badge/Laravel-13-FF2D20?style=flat-square',
                 imgAlt: 'Laravel',
             ))
@@ -40,7 +40,7 @@ final class Mosaicast implements Versionable, WithReadmeHead
                 imgAlt: 'Tests',
             ))
             ->addBadge(Badge::make(
-                link: 'https://artisantoolbox.wsssoftware.com.br/packages/mosaicast/',
+                link: 'https://atb.dev.br/packages/mosaicast/',
                 imgSrc: 'https://img.shields.io/badge/Docs-Read-blue?style=flat-square',
                 imgAlt: 'Docs',
             ));

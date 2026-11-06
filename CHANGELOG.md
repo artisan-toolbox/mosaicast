@@ -1,5 +1,20 @@
 # Changelog
 
+## [Unreleased]
+
+### Fixes
+
+- Keep Vite+ 1.5.0, its Vite core alias, and bundled Vitest 5.1.0 aligned so frontend tests and distribution builds can run after a dependency refresh.
+
+### Dependencies
+
+- Require Artisan Toolbox Maintainer 1.11 or later and Core 1.1 or later within their 1.x series.
+- Update the frontend build toolchain to Vite+ 1.5.0 and vite-plugin-dts 5.1.2. Use Node.js 24.11 or later within the Node.js 24 series for package development, matching CI.
+
+### Documentation
+
+- Update documentation links and managed README badges to `https://atb.dev.br`, and use `contact@atb.dev.br` for public package contact metadata.
+
 ## [1.2.0] - 2026-11-04
 
 ### Features
