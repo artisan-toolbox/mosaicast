@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.3.0] - 2026-11-18
+
+### Documentation
+
+- **Update changelog branding links to atb.dev.br** (`edff794`)
+  Adjusts `CHANGELOG.md` branding/documentation references so README badges and resource links point to `https://atb.dev.br` instead of the previous `https://artisantoolbox.wsssoftware.com.br`. Adds/updates release documentation text indicating forthcoming behavior guidance: the Boost skill’s “Inertia-only” path should be taught, and Echo + broadcaster setup should remain conditional on private-channel delivery. User impact: improves discoverability and removes broken/outdated branding links. Compatibility/migration: no runtime or API changes; only link/branding and documentation accuracy.
+
+### Refactoring
+
+- **Teach Inertia-only path for private broadcasts** (`f04af31`)
+  Updates the Boost skill documentation and/or integration guidance to clarify how the “Inertia-only” path should be used specifically for private broadcasts. This removes ambiguity around when Echo/broadcaster wiring is required, ensuring Echo + private-channel delivery remain conditional rather than treated as universally necessary. User impact: developers integrating the Boost/Inertia delivery path for private channels are guided to register `createMosaicast()` inside the existing Inertia `withApp` callback and to set up Reverb private broadcasting only when using private channels. Compatibility: the change is documentation/integration-logic guidance (no API removal), but it may alter how developers structure their client and broadcaster setup to match the intended conditional flow. Migration: update your integration to (1) keep Echo/broadcaster dependencies and `/broadcasting/auth` verification scoped to private-channel delivery, (2) pass the Echo instance to `createMosaicast({ echo: echo() })` when using Reverb for private channels, and (3) follow the revised Inertia client connection steps.
+
 ## [1.2.1] - 2026-11-06
 
 ### Maintenance
