@@ -38,6 +38,8 @@ User impact / compatibility notes:
 
 ## [Unreleased]
 
+- Teach the Inertia-only path in the Boost skill. Keep Echo and broadcaster setup conditional on private-channel delivery.
+
 ### Fixes
 
 - Keep Vite+ 1.5.0, its Vite core alias, and bundled Vitest 5.1.0 aligned so frontend tests and distribution builds can run after a dependency refresh.

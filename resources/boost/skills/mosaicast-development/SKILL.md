@@ -21,7 +21,7 @@ Use this skill when a Laravel application needs to integrate the Mosaicast packa
 
 - confirm the app supports PHP 8.5 and Laravel 13
 - identify the web routes, Inertia responses, queued jobs, and Vue entry point that need events
-- confirm web routes start a Laravel session and the app has a configured broadcaster and `/broadcasting/auth` route
+- confirm web routes start a Laravel session. Check the broadcaster and `/broadcasting/auth` route only for private-channel delivery
 
 ### 2. Install and dispatch
 
@@ -33,8 +33,8 @@ Use this skill when a Laravel application needs to integrate the Mosaicast packa
 ### 3. Connect the Vue client
 
 - install `@artisan-toolbox/mosaicast` using `file:vendor/artisan-toolbox/mosaicast` after Composer installation
-- keep `@laravel/echo-vue`, `laravel-echo`, and `pusher-js` in the host application's JavaScript dependencies when using Reverb
-- configure Echo in the host application and pass `echo()` to `createMosaicast()` inside the existing Inertia `withApp` callback on the client
+- register `createMosaicast()` inside the existing client-side Inertia `withApp` callback for Inertia delivery
+- for private broadcasts over Reverb, install `@laravel/echo-vue`, `laravel-echo`, and `pusher-js`. Configure Echo and pass its instance to `createMosaicast({ echo: echo() })`
 - register listeners with `mosaicast().on(name, (payload, source) => ...)` and call its unsubscribe function when a component is unmounted
 - when the backend channel prefix changes, pass the matching `channelPrefix` option to the Vue plugin
 
@@ -42,35 +42,42 @@ Use this skill when a Laravel application needs to integrate the Mosaicast packa
 
 Read before executing:
 
-- `https://atb.dev.br/packages/mosaicast/`
+- [Installation and first Inertia event](https://atb.dev.br/docs/mosaicast/installation)
 - `https://atb.dev.br/packages/mosaicast/inertia-delivery/`
 - `https://atb.dev.br/packages/mosaicast/session-channels/`
 - `https://atb.dev.br/packages/mosaicast/vue-plugin/`
 
 ## Examples
 
+Inside an existing session-backed controller, dispatch the event before returning the Inertia response that reads `mosaicast.events`.
+
 ```php
 use ArtisanToolbox\Mosaicast\Facades\Mosaicast;
 
-Mosaicast::dispatch('orders.updated', ['orderId' => $order->id]);
-
-$sessionIdentifier = Mosaicast::currentSessionIdentifier();
-// Pass the identifier to a queued job, then inside that job:
-Mosaicast::toSession($sessionIdentifier)->dispatch('orders.updated', ['orderId' => $orderId]);
+Mosaicast::dispatch('orders.updated', ['orderId' => 42]);
 ```
 
 ```ts
 import { createMosaicast, mosaicast } from '@artisan-toolbox/mosaicast';
-import { echo } from '@laravel/echo-vue';
 import type { App } from 'vue';
 
 export function attachMosaicast(app: App): () => void {
-  app.use(createMosaicast({ echo: echo<'reverb'>() }));
+  app.use(createMosaicast());
 
   return mosaicast().on('orders.updated', (payload, source) => {
     console.log(payload.orderId, source);
   });
 }
+```
+
+When the Inertia response includes `mosaicast.events`, the listener logs `42` and the delivery source. Register it before the response arrives and unsubscribe during component teardown.
+
+For private delivery from a queued job, capture `Mosaicast::currentSessionIdentifier()` in the session-backed controller. Pass that value as `$sessionIdentifier` to the job. With private broadcasting configured, dispatch inside the job:
+
+```php
+use ArtisanToolbox\Mosaicast\Facades\Mosaicast;
+
+Mosaicast::toSession($sessionIdentifier)->dispatch('orders.updated', ['orderId' => 42]);
 ```
 
 ## Anti-patterns
