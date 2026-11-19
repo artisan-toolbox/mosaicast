@@ -19,10 +19,11 @@ final class Mosaicast implements Versionable, WithReadmeHead
             ->withLogo(src: 'logo/mosaicast-icon.svg', alt: '', width: 88)
             ->withTitle('Mosaicast')
             ->withDescription('Laravel event delivery through Inertia props or private session broadcasting.')
+            ->addBadge(Badge::releaseVersion('https://github.com/artisan-toolbox/mosaicast/releases'))
             ->addBadge(Badge::make(
-                link: 'https://github.com/artisan-toolbox/mosaicast/releases',
-                imgSrc: 'https://img.shields.io/github/v/release/artisan-toolbox/mosaicast?label=Release&style=flat-square',
-                imgAlt: 'Release',
+                link: 'https://packagist.org/packages/artisan-toolbox/mosaicast',
+                imgSrc: 'https://img.shields.io/badge/Packagist-F28D1A?style=flat-square&logo=packagist&logoColor=white',
+                imgAlt: 'Packagist',
             ))
             ->addBadge(Badge::make(
                 link: 'https://atb.dev.br/packages/mosaicast/#requirements',
