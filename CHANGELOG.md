@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.2] - 2026-11-20
+
+### Continuous Integration
+
+- **Test PHP 8.6 in CI and standardize quality checks** (`cae941d`)
+  Add PHP 8.6 alongside 8.5 to the Ubuntu and Windows CI matrix for both dependency stability settings, and update the pinned Maintainer setup action from 1.14.2 to 1.14.4. Both platforms now run the same strict, non-interactive Maintainer check for PHPStan, Pint, and Pest, then run `composer test:types` separately. Locally, `composer test` uses the same combined check instead of calling the analysis, lint, and unit-test scripts directly, and runs type tests afterward. Remove Vue TSC from Maintainer’s default quality checks and run the short Pest suite serially by default. To retain parallel runs, set `MAINTAINER_PEST_PARALLEL=true`; use `MAINTAINER_PEST_PROCESSES` to override the default of two worker processes.
+
 ## [1.3.1] - 2026-11-20
 
 ### Features
