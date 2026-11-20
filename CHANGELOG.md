@@ -20,6 +20,8 @@ Maintainer configuration now supports separate AI model overrides for commit mes
 
 ## Unreleased
 
+- Use Maintainer 1.14.3 for PHP quality checks and keep the short Pest suite serial by default.
+
 - Use the Maintainer 1.14.2 root action to validate and install Composer dependencies in the PHP matrix.
 - Let Larastan 3.12.1 or later in the 3.x series select PHPStan with the Windows Turbo PHPDoc fix.
 - Validate PHP and frontend dependencies in separate CI jobs. The PHP matrix tests the released Core range, and `composer test:types` rejects incomplete Pest reports.
@@ -74,6 +76,8 @@ User impact / compatibility notes:
 - Documentation/branding URL changes may require users to update bookmarks or external links that referenced the old domain.
 
 ## [Unreleased]
+
+- Test PHP 8.5 and 8.6 in CI with the Maintainer 1.14.4 setup action.
 
 - Teach the Inertia-only path in the Boost skill. Keep Echo and broadcaster setup conditional on private-channel delivery.
 
