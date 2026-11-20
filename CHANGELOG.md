@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- Use the Maintainer 1.14.2 root action to validate and install Composer dependencies in the PHP matrix.
+- Let Larastan 3.12.1 or later in the 3.x series select PHPStan with the Windows Turbo PHPDoc fix.
+- Validate PHP and frontend dependencies in separate CI jobs. The PHP matrix tests the released Core range, and `composer test:types` rejects incomplete Pest reports.
+- Run frontend tests once with `npm test`.
+
 ## [1.3.0] - 2026-11-18
 
 ### Documentation

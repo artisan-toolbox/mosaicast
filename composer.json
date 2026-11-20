@@ -18,13 +18,13 @@
     ],
     "require": {
         "php": "^8.5",
-        "artisan-toolbox/maintainer": "^1.11.0",
+        "artisan-toolbox/maintainer": "^1.14.3",
         "illuminate/support": "^13.0",
-        "artisan-toolbox/core": "^1.1.0"
+        "artisan-toolbox/core": "^1.4.1"
     },
     "require-dev": {
         "driftingly/rector-laravel": "^2.5",
-        "larastan/larastan": "^3.9",
+        "larastan/larastan": "^3.12.1",
         "laravel/pint": "^1.29",
         "laravel/pao": "^1.0",
         "orchestra/testbench": "^11.0",
@@ -32,7 +32,6 @@
         "pestphp/pest-plugin-laravel": "^5.0",
         "pestphp/pest-plugin-type-coverage": "^5.0",
         "phpstan/extension-installer": "^1.4",
-        "phpstan/phpstan": "^2.2.8",
         "rector/rector": "^2.6.2"
     },
     "autoload": {
@@ -74,10 +73,10 @@
             "vendor/bin/pint --parallel --test"
         ],
         "analyse": [
-            "vendor/bin/phpstan analyse"
+            "vendor/bin/phpstan analyse --memory-limit=2G"
         ],
         "test:types": [
-            "vendor/bin/pest --type-coverage --min=100"
+            "@php tests/Support/check-type-coverage.php"
         ],
         "test:unit": [
             "vendor/bin/pest --parallel"

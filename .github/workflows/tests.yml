@@ -3,61 +3,104 @@ name: tests
 on:
   push:
     branches:
-      - 1.x
       - '*.x'
   pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.ref }}-${{ github.event_name == 'pull_request' && 'latest' || github.sha }}
   cancel-in-progress: true
 
 jobs:
   tests:
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 20
 
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
         php: [8.5]
-        laravel: [13.*]
         stability: [prefer-lowest, prefer-stable]
         include:
-          - laravel: 13.*
-            testbench: 11.*
+          - os: ubuntu-latest
+            runner: ubuntu-24.04
+          - os: windows-latest
+            runner: windows-2025
 
-    name: P${{ matrix.php }} - L${{ matrix.laravel }} - ${{ matrix.stability }} - ${{ matrix.os }}
+    name: P${{ matrix.php }} - L13.* - ${{ matrix.stability }} - ${{ matrix.os }}
 
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
-      - name: Setup PHP
-        uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # v2
+      - name: Set up CI dependencies
+        uses: artisan-toolbox/maintainer@498f5f8723cbed3d24af0ba90870ca26010db4df # 1.14.2
         with:
           php-version: ${{ matrix.php }}
-          extensions: dom, curl, libxml, mbstring, zip, fileinfo, sqlite, pdo_sqlite, bcmath, intl
-          ini-values: error_reporting=E_ALL
-          tools: composer:v2
-          coverage: none
+          php-extensions: dom, curl, libxml, mbstring, zip, fileinfo, sqlite, pdo_sqlite, bcmath, intl
+          composer-mode: ${{ matrix.stability }}
+          composer-validation: no-check-lock
+          composer-scripts: 'false'
 
-      - name: Install dependencies
+      - name: Discover Testbench packages
+        run: composer run prepare
+
+      - name: Run PHP checks
+        if: runner.os != 'Windows'
+        run: composer test
+
+      - name: Run PHP checks on Windows
+        if: runner.os == 'Windows'
+        shell: bash
         run: |
-          composer require "artisan-toolbox/core:1.x-dev" "laravel/framework:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --no-update
-          composer update --${{ matrix.stability }} --prefer-dist --no-interaction --no-progress --no-scripts
-          composer run prepare
+          composer analyse
+          composer lint:check
+          composer test:types
+          php vendor/bin/pest
+
+  frontend:
+    name: Frontend - Node 24 - ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-2025]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Set up Node.js
-        uses: actions/setup-node@v7
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 24
           cache: npm
 
       - name: Install frontend dependencies
-        run: npm ci
+        run: npm ci --no-fund
 
-      - name: Run configured quality checks
-        run: php vendor/bin/maintainer quality:check --no-interaction
+      - name: Run frontend checks and build
+        shell: bash
+        run: |
+          npm run check
+          npm test
+          npm run build
+
+      - name: Compare rebuilt files with the committed distribution
+        if: runner.os == 'Linux'
+        run: |
+          changes=$(git status --porcelain=v1 --untracked-files=all -- dist)
+          if [ -n "$changes" ]; then
+            printf '%s\n' "$changes"
+            exit 1
+          fi

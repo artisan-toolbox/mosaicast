@@ -39,19 +39,20 @@ composer lint
 
 ## Tests
 
-Run all tests:
+Run the PHP checks:
 
 ```bash
 composer test
 ```
 
-Run the configured CI checks and build the distributed frontend assets:
+Run the frontend checks and build the distributed frontend assets:
 
 ```bash
-php vendor/bin/maintainer quality:check --no-interaction
+npm run check
+npm test
 npm run build
 ```
 
-The checks validate PHP tests, formatting, static analysis, frontend tests, and TypeScript. The build writes the ESM client, IIFE bundle, and type declarations to `dist/`.
+The PHP checks run Pest, Pint, PHPStan, and type coverage. The frontend checks run formatting, linting, TypeScript, and the frontend tests. The build writes the ESM client, IIFE bundle, and type declarations to `dist/`. Include any rebuilt assets with their source changes.
 
 When updating Vite+, keep its version, the `overrides.vite` core alias, and the `overrides.vitest` version aligned with the versions bundled by Vite+. Follow the [Vite+ update guide](https://viteplus.dev/guide/upgrade-project) and commit the refreshed lockfile and `dist/` assets together.
