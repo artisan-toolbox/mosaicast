@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.3.1] - 2026-11-20
+
+### Features
+
+- **Add version and Packagist badges to README metadata** (`a408801`)
+  Replaces the dynamic GitHub release badge with a version badge generated from `Mosaicast::VERSION` while keeping the link to GitHub Releases. Adds a Packagist badge linking to `artisan-toolbox/mosaicast` so readers can find the Composer package directly. The README now links to the installation requirements instead of repeating them inline; the PHP ^8.5 and Laravel 13 badges and the Composer install command are unchanged. Metadata tests verify the version badge and both links, check that prerelease hyphens are escaped correctly in Shields.io URLs, and retain coverage for the existing compatibility, test, and documentation badges. No installation or migration changes are required for the badge update.
+
+### Continuous Integration
+
+- **Run PHP and frontend checks in separate CI jobs** (`df45cf0`)
+  Splits validation into independent, non-fail-fast PHP and frontend matrices on Ubuntu 24.04 and Windows Server 2025, with respective timeouts of 20 and 15 minutes and checkout credential persistence disabled. The workflow can be triggered manually and cancels superseded pull-request runs without canceling runs for different commits outside pull requests. PHP CI keeps PHP 8.5 coverage with both lowest and stable dependency versions. The Maintainer 1.14.2 action validates Composer without checking the lockfile and installs the declared dependencies with install scripts disabled, so CI tests the released Core range instead of forcing development constraints for Core, Laravel, and Testbench. CI then runs `composer run prepare` explicitly, followed by `composer test` on Linux or separate analysis, lint, type coverage, and Pest commands on Windows.
+
+Raises the minimum versions of Maintainer, Core, and Larastan to 1.14.3, 1.4.1, and 3.12.1 while retaining caret constraints. Larastan supplies PHPStan with the Windows Turbo PHPDoc fix, replacing the direct PHPStan dev dependency; `composer analyse` now uses a 2 GB memory limit. The new `composer test:types` wrapper forwards CLI arguments to Pest, requires 100% type coverage, and fails if the JSON report omits any PHP source file other than Blade templates and `src/Concerns/DispatchesMosaicast.php`. It lists missing files and cleans up its temporary report directory. Pest now runs in parallel by default; set `MAINTAINER_PEST_PARALLEL=false` to keep serial execution.
+
+The frontend job uses Node 24 with pinned setup-node v7.1.0 and runs `npm ci --no-fund`, `npm run check`, and `npm test`. The test script now runs once and exits instead of watching for changes. The contributor guide replaces the combined Maintainer quality command with `composer test` for PHP and `npm run check` plus `npm test` for frontend validation. It also asks contributors to commit the rebuilt ESM client, IIFE bundle, and type declarations from `dist/` alongside source changes. The Unreleased changelog records the CI and validation changes.
+
+Maintainer configuration now supports separate AI model overrides for commit messages, release type suggestions, release notes, and changelog updates, all defaulting to `gpt-6.2-sol`. It also adds configurable local feedback and project locales, with the project locale defaulting to `en`, and sets `tests.yml` as the release workflow.
+
 ## Unreleased
 
 - Use the Maintainer 1.14.2 root action to validate and install Composer dependencies in the PHP matrix.
